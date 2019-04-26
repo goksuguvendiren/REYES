@@ -8,6 +8,21 @@
 
 namespace rys
 {
+    struct polygon
+    {
+        const glm::vec2i& current;
+        const glm::vec2i& right;
+        const glm::vec2i& below;
+        const glm::vec2i& cross;
+    };
+
+    struct triangle
+    {
+        const glm::vec2i& a;
+        const glm::vec2i& b;
+        const glm::vec2i& c;
+    };
+
     enum class Display_Type
     {
         Framebuffer,
@@ -58,6 +73,8 @@ namespace rys
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
 
         std::vector<glm::vec3>& get_frame_buffer();
+        std::vector<glm::vec2>& get_sample_buffer();
+        void initialize_buffers();
 
         void set_format(int xres, int yres, float pix_asp_ratio);
 
@@ -84,9 +101,10 @@ namespace rys
         std::string name;
 
         std::vector<glm::vec3> frame_buffer;
+        std::vector<glm::vec2> sample_buffer;
 
-        int width;
-        int height;
+        unsigned int width;
+        unsigned int height;
         float aspect_ratio; // pixel aspect ratio
         float viewport_aspect_ratio;
         float fov;
@@ -111,5 +129,8 @@ namespace rys
         glm::vec3 current_color;
 
         std::stack<glm::mat4> transform_stack;
+
+        glm::vec<2, int, glm::defaultp> get_ss_coords(const glm::vec4& point);
+        std::vector<int> find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
     };
 }

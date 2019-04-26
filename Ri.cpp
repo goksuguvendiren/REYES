@@ -159,8 +159,7 @@ void RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 void RiFrameBegin(RtInt frame)
 {
     rys::renderer->set_cur_frame_id(frame);
-    auto& frame_buffer = rys::renderer->get_frame_buffer();
-    std::fill(frame_buffer.begin(), frame_buffer.end(), glm::vec3{0, 0, 0});    // clear the frame buffer
+    rys::renderer->initialize_buffers();
 }
 
 void RiFrameEnd()

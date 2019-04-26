@@ -28,3 +28,8 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat4& vec)
 
     return os;
 }
+
+namespace glm
+{
+    using vec2i = glm::vec<2, int, glm::defaultp>;
+}

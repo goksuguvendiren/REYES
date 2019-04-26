@@ -1,11 +1,9 @@
 #include "Reyes.hpp"
 #include <opencv2/opencv.hpp>
-//#include "cimg.h"
 #include <stdexcept>
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
-
-//namespace cimg = cimg_library;
+#include <random>
 
 rys::reyes::reyes(const std::string& n) : near(0.1f), far(100.f)
 {
@@ -22,6 +20,9 @@ rys::reyes::reyes(const std::string& n) : near(0.1f), far(100.f)
     view_matrix = glm::lookAt(glm::vec3{0, 0, 0}, glm::vec3{0, 0, 1}, glm::vec3{0, 1, 0});
 
     current_color = glm::vec3(1.0f);
+
+    pixel_xsamples = 1;
+    pixel_ysamples = 1;
 }
 
 void rys::reyes::world_begin()
@@ -68,6 +69,15 @@ std::vector<glm::vec3>& rys::reyes::get_frame_buffer()
         frame_buffer.resize(width * height);
     }
     return frame_buffer;
+}
+
+std::vector<glm::vec2>& rys::reyes::get_sample_buffer()
+{
+    if (sample_buffer.empty())
+    {
+        sample_buffer.resize(width * pixel_xsamples * height * pixel_ysamples);
+    }
+    return sample_buffer;
 }
 
 void rys::reyes::save_frame()
@@ -132,6 +142,59 @@ void rys::reyes::paint_pixel(int x, int y, const glm::vec3 &color)
     frame_buffer[ind] = color;
 }
 
+
+glm::vec2i rys::reyes::get_ss_coords(const glm::vec4& point)
+{
+    auto unit_cube = proj_matrix * view_matrix * point;
+    unit_cube /= unit_cube.w;
+
+    unit_cube = viewport_matrix * unit_cube;
+
+    glm::vec2 ss_coords(unit_cube);
+    ss_coords.x = std::min(ss_coords.x, (float)width - 1);
+    ss_coords.x = std::max(ss_coords.x, 0.f);
+    ss_coords.y = std::min(ss_coords.y, (float)height - 1);
+    ss_coords.y = std::max(ss_coords.y, 0.f);
+
+    return {(int)ss_coords.x, (int)ss_coords.y};
+}
+
+std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly)
+{
+    glm::vec2i bb_min;
+    glm::vec2i bb_max;
+
+    bb_min.x = std::min(std::min(std::min(mpoly.current.x, mpoly.right.x), mpoly.below.x), mpoly.cross.x);
+    bb_min.y = std::min(std::min(std::min(mpoly.current.y, mpoly.right.y), mpoly.below.y), mpoly.cross.y);
+
+    bb_max.x = std::max(std::max(std::max(mpoly.current.x, mpoly.right.x), mpoly.below.x), mpoly.cross.x);
+    bb_max.y = std::max(std::max(std::max(mpoly.current.y, mpoly.right.y), mpoly.below.y), mpoly.cross.y);
+
+    return {bb_min, bb_max};
+}
+
+std::vector<int> rys::reyes::find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
+{
+    auto bb_min = bb.first;
+    auto bb_max = bb.second;
+    auto top_left = glm::vec2i{bb_min.x, bb_max.y};
+    auto bot_right = glm::vec2i{bb_max.x, bb_min.y};
+
+    auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
+    auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
+
+    for (int i = top_left.y * pixel_ysamples; i <= bot_right.y * pixel_ysamples; ++i)
+    {
+        for (int j = top_left.x * pixel_xsamples; j <= bot_right.x * pixel_xsamples; ++j)
+        {
+//            if (tri1.intersects(sample_buffer[i][j]) || tri2.intersects(sample_buffer[i][j]))
+//            {
+//                sample_buffer[i][j]->set_color(get_color());
+//            }
+        }
+    }
+}
+
 void rys::reyes::render(const rys::Sphere &sphere)
 {
     auto mesh = sphere.dice();
@@ -141,35 +204,33 @@ void rys::reyes::render(const rys::Sphere &sphere)
     {
         for (int j = 0; j < samples[0].size(); ++j)
         {
-            auto sample = samples[i][j];
+            auto current = get_ss_coords(samples[i][j]);
+            auto right   = get_ss_coords(samples[i][(j+1) % samples[0].size()]);
+            auto below   = get_ss_coords(samples[(i+1) % samples.size()][j]);
+            auto cross   = get_ss_coords(samples[(i+1) % samples.size()][(j+1) % samples[0].size()]);
 
-            auto unit_cube = proj_matrix * view_matrix * sample;
-            unit_cube /= unit_cube.w;
+            auto mpoly = rys::polygon{current, right, below, cross};
 
-//            if (unit_cube.x < -1 || unit_cube.x > 1 || unit_cube.y < -1 || unit_cube.y > 1 || unit_cube.z < -1 ||
-//                unit_cube.z > 1)
-//                throw std::runtime_error("Coordinates should be between -1 and 1 after projection transformation!");
+            auto bounding_box = find_bounding_box(mpoly);
+            auto bb_min = bounding_box.first;
+            auto bb_max = bounding_box.second;
+            auto top_left = glm::vec2i{bb_min.x, bb_min.y};
+            auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
 
-            unit_cube = viewport_matrix * unit_cube;
+//            for (int i = top_left.y; i <= bot_right.y; ++i)
+//            {
+//                for (int j = top_left.x; j <= bot_right.x; ++j)
+//                {
+//                    paint_pixel(j, i, get_color());
+//                }
+//            }
 
-            glm::vec2 ss_coords(unit_cube);
-            ss_coords.x = std::min(ss_coords.x, (float)width - 1);
-            ss_coords.x = std::max(ss_coords.x, 0.f);
-            ss_coords.y = std::min(ss_coords.y, (float)height - 1);
-            ss_coords.y = std::max(ss_coords.y, 0.f);
+//            auto intersecting_samples = find_intersecting_samples(bounding_box, mpoly);
+            // then, set the current color to the intersecting samples.
 
-            paint_pixel(ss_coords.x, ss_coords.y, get_color());
+            paint_pixel(current.x, current.y, get_color());
         }
     }
-
-//    glm::vec4 asd = proj_matrix * view_matrix * glm::vec4(sphere.get_center(), 1.0f);
-//    asd /= asd.w;
-//
-//    asd = viewport_matrix * asd;
-//
-//    glm::vec2 ss_coords(asd);
-//
-//    paint_pixel(ss_coords.x, ss_coords.y, get_color());
 }
 
 void rys::reyes::push_current_matrix()
@@ -197,21 +258,30 @@ void rys::reyes::setup_projection(rys::Projection_Model model, float f)
     proj_model = model;
     fov = f;
 
-//    proj_matrix = glm::mat4(1.0f);
-//
-//    auto y_scale = 1.f / std::tan(radians(fov) / 2.f);
-//    auto x_scale = y_scale / viewport_aspect_ratio;
-//
-//    proj_matrix[0][0] = x_scale;
-//    proj_matrix[1][1] = y_scale;
-//    proj_matrix[2][2] = (near + far) / (near - far);
-//    proj_matrix[2][3] = -1;
-//    proj_matrix[3][3] = 2 * near * far / (near - far);
-//
-//    proj_matrix = glm::transpose(proj_matrix);
-    double f_o_v = radians(f);
-//    proj_matrix = glm::perspectiveFov<double>(f, width, height, near, far);
-//    proj_matrix = glm::perspective(45.f, viewport_aspect_ratio, near, far);
     proj_matrix = glm::perspective(45.f, 4.0f / 3.0f, 0.1f, 100.f);
+}
+
+void rys::reyes::initialize_buffers()
+{
+    auto& frame_buffer = get_frame_buffer();
+    std::fill(frame_buffer.begin(), frame_buffer.end(), glm::vec3{0, 0, 0});    // clear the frame buffer
+
+    auto& samples_buffer = get_sample_buffer();
+
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+    for (int i = 0; i < height * pixel_ysamples; ++i)
+    {
+        for (int j = 0; j < width * pixel_xsamples; ++j)
+        {
+            auto x = dist(mt);
+            auto y = dist(mt);
+
+            auto ind = i * width * pixel_xsamples + j;
+            samples_buffer[ind] = glm::vec2{x, y};
+        }
+    }
 }
 
