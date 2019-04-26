@@ -50,7 +50,6 @@ namespace rys
 
         void setup_display(Display_Type type, const std::string& name, Display_Mode mode);
         void setup_projection(Projection_Model model, float f);
-        //proj_matrix
 
         void set_cur_frame_id(int id) { current_frame = id; }
         int get_cur_frame_id() const { return current_frame; }

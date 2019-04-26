@@ -29,7 +29,6 @@ void rys::reyes::world_begin()
     world_began = true;
     view_matrix = view_matrix * current_matrix;
     current_matrix = glm::mat4(1.0f);
-
     //after this, the current_matrix represents the obj_to_world transformation.
 }
 
@@ -51,7 +50,7 @@ void rys::reyes::set_format(int xres, int yres, float pix_asp_ratio)
     viewport_matrix[1][1] = height / 2.f;
     viewport_matrix[1][3] = height / 2.f;
 
-//    viewport_matrix = glm::transpose(viewport_matrix);
+    viewport_matrix = glm::transpose(viewport_matrix);
 }
 
 // either show the framebuffer or save it to a file.
@@ -135,16 +134,42 @@ void rys::reyes::paint_pixel(int x, int y, const glm::vec3 &color)
 
 void rys::reyes::render(const rys::Sphere &sphere)
 {
-//    auto mesh = sphere.dice();
+    auto mesh = sphere.dice();
 
-    glm::vec4 asd = proj_matrix * view_matrix * glm::vec4(sphere.get_center(), 1.0f);
-    asd /= asd.w;
+    auto samples = mesh.get_samples();
+    for (int i = 0; i < samples.size(); ++i)
+    {
+        for (int j = 0; j < samples[0].size(); ++j)
+        {
+            auto sample = samples[i][j];
 
-    asd = glm::transpose(viewport_matrix) * asd;
+            auto unit_cube = proj_matrix * view_matrix * sample;
+            unit_cube /= unit_cube.w;
 
-    glm::vec2 ss_coords(asd);
+//            if (unit_cube.x < -1 || unit_cube.x > 1 || unit_cube.y < -1 || unit_cube.y > 1 || unit_cube.z < -1 ||
+//                unit_cube.z > 1)
+//                throw std::runtime_error("Coordinates should be between -1 and 1 after projection transformation!");
 
-    paint_pixel(ss_coords.x, ss_coords.y, get_color());
+            unit_cube = viewport_matrix * unit_cube;
+
+            glm::vec2 ss_coords(unit_cube);
+            ss_coords.x = std::min(ss_coords.x, (float)width - 1);
+            ss_coords.x = std::max(ss_coords.x, 0.f);
+            ss_coords.y = std::min(ss_coords.y, (float)height - 1);
+            ss_coords.y = std::max(ss_coords.y, 0.f);
+
+            paint_pixel(ss_coords.x, ss_coords.y, get_color());
+        }
+    }
+
+//    glm::vec4 asd = proj_matrix * view_matrix * glm::vec4(sphere.get_center(), 1.0f);
+//    asd /= asd.w;
+//
+//    asd = viewport_matrix * asd;
+//
+//    glm::vec2 ss_coords(asd);
+//
+//    paint_pixel(ss_coords.x, ss_coords.y, get_color());
 }
 
 void rys::reyes::push_current_matrix()
