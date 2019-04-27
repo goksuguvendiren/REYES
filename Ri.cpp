@@ -202,6 +202,7 @@ void RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax, ...)
 void RiColor(RtColor color)
 {
     rys::renderer->set_color({color[0], color[1], color[2]});
+    rys::renderer->set_color({color[0], color[1], color[2]});
 }
 
 void RiFormat(RtInt xres, RtInt yres, RtFloat aspect)

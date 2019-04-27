@@ -77,6 +77,7 @@ void rys::reyes::save_frame()
 
     // rows, cols, type, data
     cv::Mat image(height, width, CV_32FC3, float_image.data());
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 //    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
 
 //    cimg::CImg<float> image(width, height, 1, 3, 255.f);
