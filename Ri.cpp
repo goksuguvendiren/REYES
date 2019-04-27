@@ -151,10 +151,11 @@ void RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 //    rys::renderer->add_transform(glm::transpose(around_x));
 }
 
-// void RiScale(RtFloat sx, RtFloat sy, RtFloat sz)
-// {
-
-// }
+void RiScale(RtFloat sx, RtFloat sy, RtFloat sz)
+{
+    auto glm_sc = glm::scale(glm::vec3{sx, sy, sz});
+    rys::renderer->add_transform(glm_sc);
+}
 
 void RiFrameBegin(RtInt frame)
 {

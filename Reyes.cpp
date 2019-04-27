@@ -56,13 +56,22 @@ void rys::reyes::setup_display(Display_Type type, const std::string& n, Display_
     disp_mode = mode;
 }
 
-std::vector<rys::sample>& rys::reyes::get_frame_buffer()
+std::vector<rys::sample>& rys::reyes::create_frame_buffer()
 {
     if (frame_buffer.empty())
     {
         frame_buffer.resize(width * height);
     }
     return frame_buffer;
+}
+
+std::vector<float>& rys::reyes::create_depth_buffer()
+{
+    if (depth_buffer.empty())
+    {
+        depth_buffer.resize(width * height);
+    }
+    return depth_buffer;
 }
 
 void rys::reyes::save_frame()
@@ -139,7 +148,25 @@ rys::sample rys::reyes::get_pixel(int x, int y)
     return frame_buffer[ind];
 }
 
-glm::vec2i rys::reyes::get_ss_coords(const glm::vec4& point)
+float rys::reyes::get_depth(int x, int y)
+{
+    if (x < 0 || x >= width || y < 0 || y >= height)
+        throw std::runtime_error("Invalid pixel indices!");
+
+    auto ind = y * width + x;
+    return depth_buffer[ind];
+}
+
+void rys::reyes::set_depth(int x, int y, float n_depth)
+{
+    if (x < 0 || x >= width || y < 0 || y >= height)
+        throw std::runtime_error("Invalid pixel indices!");
+
+    auto ind = y * width + x;
+    depth_buffer[ind] = n_depth;
+}
+
+glm::vec3 rys::reyes::get_ss_coords(const glm::vec4& point)
 {
     auto unit_cube = proj_matrix * view_matrix * point;
     unit_cube /= unit_cube.w;
@@ -152,7 +179,7 @@ glm::vec2i rys::reyes::get_ss_coords(const glm::vec4& point)
     ss_coords.y = std::min(ss_coords.y, (float)height - 1);
     ss_coords.y = std::max(ss_coords.y, 0.f);
 
-    return {(int)ss_coords.x, (int)ss_coords.y};
+    return {(int)ss_coords.x, (int)ss_coords.y, unit_cube.z};
 }
 
 std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly)
@@ -176,6 +203,8 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
     auto top_left = glm::vec2i{bb_min.x, bb_min.y};
     auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
 
+    float average_depth = mpoly.get_average_depth();
+
     auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
     auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
 
@@ -183,11 +212,14 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
     {
         for (int j = top_left.x; j <= bot_right.x; ++j)
         {
-//            paint_pixel(j, i, get_color());
             auto ss_coord = glm::vec2{get_pixel(j, i).point.x + j, get_pixel(j, i).point.y + i};
             if (tri1.intersects(ss_coord) || tri2.intersects(ss_coord))
             {
-                paint_pixel(j, i, get_color());
+                if (get_depth(j, i) > average_depth)
+                {
+                    paint_pixel(j, i, get_color());
+                    set_depth(j, i, average_depth);
+                }
             }
         }
     }
@@ -215,18 +247,7 @@ void rys::reyes::render(const rys::Sphere &sphere)
             auto top_left = glm::vec2i{bb_min.x, bb_min.y};
             auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
 
-//            for (int i = top_left.y; i <= bot_right.y; ++i)
-//            {
-//                for (int j = top_left.x; j <= bot_right.x; ++j)
-//                {
-////                    paint_pixel(j, i, get_color());
-//                }
-//            }
-
             paint_intersecting_samples(bounding_box, mpoly);
-            // then, set the current color to the intersecting samples.
-
-//            paint_pixel(current.x, current.y, get_color());
         }
     }
 }
@@ -245,11 +266,6 @@ void rys::reyes::pop_current_matrix()
     current_matrix = top;
 }
 
-static double radians(float degrees)
-{
-    return degrees * (rys::pi / 180.f);
-}
-
 void rys::reyes::setup_projection(rys::Projection_Model model, float f)
 {
     //TODO : Implement ortho projection!
@@ -265,7 +281,8 @@ void rys::reyes::initialize_buffers()
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    auto& frame_buffer = get_frame_buffer();
+    create_frame_buffer();
+    create_depth_buffer();
     std::for_each(frame_buffer.begin(), frame_buffer.end(), [&](auto& sample)
     {
         auto x = dist(mt);
@@ -273,6 +290,8 @@ void rys::reyes::initialize_buffers()
         sample.color = glm::vec3{0, 0, 0};  // clear the frame buffer
         sample.point = glm::vec2(x, y);
     });
+
+    std::fill(depth_buffer.begin(), depth_buffer.end(), std::numeric_limits<float>::infinity());
 }
 
 void rys::reyes::set_pixel_samples(int xsamples, int ysamples)
@@ -319,4 +338,9 @@ bool rys::triangle::intersects(const glm::vec2 &point)
     has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
     return !(has_neg && has_pos);
+}
+
+float rys::polygon::get_average_depth() const
+{
+    return (current.z + right.z + below.z + cross.z) / 4.f;
 }
