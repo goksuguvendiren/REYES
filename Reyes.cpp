@@ -42,16 +42,10 @@ void rys::reyes::set_format(int xres, int yres, float pix_asp_ratio)
 {
     width = xres;
     height = yres;
+
+    real_width = xres;
+    real_height = yres;
     aspect_ratio = pix_asp_ratio;
-    viewport_aspect_ratio = (width * aspect_ratio) / (float)height;
-
-    viewport_matrix = glm::mat4(1.0f);
-    viewport_matrix[0][0] = width / 2.f;
-    viewport_matrix[0][3] = width / 2.f;
-    viewport_matrix[1][1] = height / 2.f;
-    viewport_matrix[1][3] = height / 2.f;
-
-    viewport_matrix = glm::transpose(viewport_matrix);
 }
 
 // either show the framebuffer or save it to a file.
@@ -71,15 +65,6 @@ std::vector<glm::vec3>& rys::reyes::get_frame_buffer()
     return frame_buffer;
 }
 
-std::vector<glm::vec2>& rys::reyes::get_sample_buffer()
-{
-    if (sample_buffer.empty())
-    {
-        sample_buffer.resize(width * pixel_xsamples * height * pixel_ysamples);
-    }
-    return sample_buffer;
-}
-
 void rys::reyes::save_frame()
 {
     std::vector<float> float_image;
@@ -92,6 +77,7 @@ void rys::reyes::save_frame()
 
     // rows, cols, type, data
     cv::Mat image(height, width, CV_32FC3, float_image.data());
+    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
 
 //    cimg::CImg<float> image(width, height, 1, 3, 255.f);
 //    cimg::CImg<unsigned char> img_normalized = image.get_normalize(0,255);
@@ -172,28 +158,28 @@ std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly)
 
     return {bb_min, bb_max};
 }
-
-std::vector<int> rys::reyes::find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
-{
-    auto bb_min = bb.first;
-    auto bb_max = bb.second;
-    auto top_left = glm::vec2i{bb_min.x, bb_max.y};
-    auto bot_right = glm::vec2i{bb_max.x, bb_min.y};
-
-    auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
-    auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
-
-    for (int i = top_left.y * pixel_ysamples; i <= bot_right.y * pixel_ysamples; ++i)
-    {
-        for (int j = top_left.x * pixel_xsamples; j <= bot_right.x * pixel_xsamples; ++j)
-        {
-//            if (tri1.intersects(sample_buffer[i][j]) || tri2.intersects(sample_buffer[i][j]))
-//            {
-//                sample_buffer[i][j]->set_color(get_color());
-//            }
-        }
-    }
-}
+//
+//std::vector<int> rys::reyes::find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
+//{
+//    auto bb_min = bb.first;
+//    auto bb_max = bb.second;
+//    auto top_left = glm::vec2i{bb_min.x, bb_max.y};
+//    auto bot_right = glm::vec2i{bb_max.x, bb_min.y};
+//
+//    auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
+//    auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
+//
+//    for (int i = top_left.y * pixel_ysamples; i <= bot_right.y * pixel_ysamples; ++i)
+//    {
+//        for (int j = top_left.x * pixel_xsamples; j <= bot_right.x * pixel_xsamples; ++j)
+//        {
+////            if (tri1.intersects(sample_buffer[i][j]) || tri2.intersects(sample_buffer[i][j]))
+////            {
+////                sample_buffer[i][j]->set_color(get_color());
+////            }
+//        }
+//    }
+//}
 
 void rys::reyes::render(const rys::Sphere &sphere)
 {
@@ -266,22 +252,44 @@ void rys::reyes::initialize_buffers()
     auto& frame_buffer = get_frame_buffer();
     std::fill(frame_buffer.begin(), frame_buffer.end(), glm::vec3{0, 0, 0});    // clear the frame buffer
 
-    auto& samples_buffer = get_sample_buffer();
+//    auto& samples_buffer = get_sample_buffer();
 
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
+//    std::random_device rd;
+//    std::mt19937 mt(rd());
+//    std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    for (int i = 0; i < height * pixel_ysamples; ++i)
-    {
-        for (int j = 0; j < width * pixel_xsamples; ++j)
-        {
-            auto x = dist(mt);
-            auto y = dist(mt);
+//    for (int i = 0; i < height * pixel_ysamples; ++i)
+//    {
+//        for (int j = 0; j < width * pixel_xsamples; ++j)
+//        {
+//            auto x = dist(mt);
+//            auto y = dist(mt);
+//
+//            auto ind = i * width * pixel_xsamples + j;
+//            samples_buffer[ind] = glm::vec2{x, y};
+//        }
+//    }
+}
 
-            auto ind = i * width * pixel_xsamples + j;
-            samples_buffer[ind] = glm::vec2{x, y};
-        }
-    }
+void rys::reyes::set_pixel_samples(int xsamples, int ysamples)
+{
+    pixel_xsamples = xsamples;
+    pixel_ysamples = ysamples;
+
+    width  *= pixel_xsamples;
+    height *= pixel_ysamples;
+}
+
+void rys::reyes::initialize_viewport()
+{
+    viewport_aspect_ratio = (width * aspect_ratio) / (float)height;
+
+    viewport_matrix = glm::mat4(1.0f);
+    viewport_matrix[0][0] = width / 2.f;
+    viewport_matrix[0][3] = width / 2.f;
+    viewport_matrix[1][1] = height / 2.f;
+    viewport_matrix[1][3] = height / 2.f;
+
+    viewport_matrix = glm::transpose(viewport_matrix);
 }
 

@@ -160,6 +160,7 @@ void RiFrameBegin(RtInt frame)
 {
     rys::renderer->set_cur_frame_id(frame);
     rys::renderer->initialize_buffers();
+    rys::renderer->initialize_viewport();
 }
 
 void RiFrameEnd()

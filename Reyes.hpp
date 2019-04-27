@@ -69,12 +69,12 @@ namespace rys
         void set_cur_frame_id(int id) { current_frame = id; }
         int get_cur_frame_id() const { return current_frame; }
 
-        void set_pixel_samples(int xsamples, int ysamples) { pixel_xsamples = xsamples; pixel_ysamples = ysamples; }
+        void set_pixel_samples(int xsamples, int ysamples);
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
 
         std::vector<glm::vec3>& get_frame_buffer();
-        std::vector<glm::vec2>& get_sample_buffer();
         void initialize_buffers();
+        void initialize_viewport();
 
         void set_format(int xres, int yres, float pix_asp_ratio);
 
@@ -101,7 +101,9 @@ namespace rys
         std::string name;
 
         std::vector<glm::vec3> frame_buffer;
-        std::vector<glm::vec2> sample_buffer;
+
+        unsigned int real_width;
+        unsigned int real_height;
 
         unsigned int width;
         unsigned int height;
@@ -131,6 +133,6 @@ namespace rys
         std::stack<glm::mat4> transform_stack;
 
         glm::vec<2, int, glm::defaultp> get_ss_coords(const glm::vec4& point);
-        std::vector<int> find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
+//        std::vector<int> find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
     };
 }
