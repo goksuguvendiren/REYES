@@ -56,7 +56,7 @@ void rys::reyes::setup_display(Display_Type type, const std::string& n, Display_
     disp_mode = mode;
 }
 
-std::vector<glm::vec3>& rys::reyes::get_frame_buffer()
+std::vector<rys::sample>& rys::reyes::get_frame_buffer()
 {
     if (frame_buffer.empty())
     {
@@ -70,14 +70,14 @@ void rys::reyes::save_frame()
     std::vector<float> float_image;
     for (int i = 0; i < height * width; ++i)
     {
-        float_image.push_back(frame_buffer[i].x);
-        float_image.push_back(frame_buffer[i].y);
-        float_image.push_back(frame_buffer[i].z);
+        float_image.push_back(frame_buffer[i].color.x);
+        float_image.push_back(frame_buffer[i].color.y);
+        float_image.push_back(frame_buffer[i].color.z);
     }
 
     // rows, cols, type, data
     cv::Mat image(height, width, CV_32FC3, float_image.data());
-    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
+//    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
 
 //    cimg::CImg<float> image(width, height, 1, 3, 255.f);
 //    cimg::CImg<unsigned char> img_normalized = image.get_normalize(0,255);
@@ -89,6 +89,7 @@ void rys::reyes::save_frame()
     cv::imshow("debug", image);
     cv::waitKey(0);
 
+    return;
     switch(disp_type)
     {
         case Display_Type::Image:
@@ -125,9 +126,17 @@ void rys::reyes::paint_pixel(int x, int y, const glm::vec3 &color)
         throw std::runtime_error("Invalid pixel indices!");
 
     auto ind = y * width + x;
-    frame_buffer[ind] = color;
+    frame_buffer[ind].color = color;
 }
 
+rys::sample rys::reyes::get_pixel(int x, int y)
+{
+    if (x < 0 || x >= width || y < 0 || y >= height)
+        throw std::runtime_error("Invalid pixel indices!");
+
+    auto ind = y * width + x;
+    return frame_buffer[ind];
+}
 
 glm::vec2i rys::reyes::get_ss_coords(const glm::vec4& point)
 {
@@ -158,28 +167,30 @@ std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly)
 
     return {bb_min, bb_max};
 }
-//
-//std::vector<int> rys::reyes::find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
-//{
-//    auto bb_min = bb.first;
-//    auto bb_max = bb.second;
-//    auto top_left = glm::vec2i{bb_min.x, bb_max.y};
-//    auto bot_right = glm::vec2i{bb_max.x, bb_min.y};
-//
-//    auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
-//    auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
-//
-//    for (int i = top_left.y * pixel_ysamples; i <= bot_right.y * pixel_ysamples; ++i)
-//    {
-//        for (int j = top_left.x * pixel_xsamples; j <= bot_right.x * pixel_xsamples; ++j)
-//        {
-////            if (tri1.intersects(sample_buffer[i][j]) || tri2.intersects(sample_buffer[i][j]))
-////            {
-////                sample_buffer[i][j]->set_color(get_color());
-////            }
-//        }
-//    }
-//}
+
+void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
+{
+    auto bb_min = bb.first;
+    auto bb_max = bb.second;
+    auto top_left = glm::vec2i{bb_min.x, bb_min.y};
+    auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
+
+    auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
+    auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
+
+    for (int i = top_left.y; i <= bot_right.y; ++i)
+    {
+        for (int j = top_left.x; j <= bot_right.x; ++j)
+        {
+//            paint_pixel(j, i, get_color());
+            auto ss_coord = glm::vec2{get_pixel(j, i).point.x + j, get_pixel(j, i).point.y + i};
+            if (tri1.intersects(ss_coord) || tri2.intersects(ss_coord))
+            {
+                paint_pixel(j, i, get_color());
+            }
+        }
+    }
+}
 
 void rys::reyes::render(const rys::Sphere &sphere)
 {
@@ -207,14 +218,14 @@ void rys::reyes::render(const rys::Sphere &sphere)
 //            {
 //                for (int j = top_left.x; j <= bot_right.x; ++j)
 //                {
-//                    paint_pixel(j, i, get_color());
+////                    paint_pixel(j, i, get_color());
 //                }
 //            }
 
-//            auto intersecting_samples = find_intersecting_samples(bounding_box, mpoly);
+            paint_intersecting_samples(bounding_box, mpoly);
             // then, set the current color to the intersecting samples.
 
-            paint_pixel(current.x, current.y, get_color());
+//            paint_pixel(current.x, current.y, get_color());
         }
     }
 }
@@ -249,26 +260,18 @@ void rys::reyes::setup_projection(rys::Projection_Model model, float f)
 
 void rys::reyes::initialize_buffers()
 {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
     auto& frame_buffer = get_frame_buffer();
-    std::fill(frame_buffer.begin(), frame_buffer.end(), glm::vec3{0, 0, 0});    // clear the frame buffer
-
-//    auto& samples_buffer = get_sample_buffer();
-
-//    std::random_device rd;
-//    std::mt19937 mt(rd());
-//    std::uniform_real_distribution<double> dist(0.0, 1.0);
-
-//    for (int i = 0; i < height * pixel_ysamples; ++i)
-//    {
-//        for (int j = 0; j < width * pixel_xsamples; ++j)
-//        {
-//            auto x = dist(mt);
-//            auto y = dist(mt);
-//
-//            auto ind = i * width * pixel_xsamples + j;
-//            samples_buffer[ind] = glm::vec2{x, y};
-//        }
-//    }
+    std::for_each(frame_buffer.begin(), frame_buffer.end(), [&](auto& sample)
+    {
+        auto x = dist(mt);
+        auto y = dist(mt);
+        sample.color = glm::vec3{0, 0, 0};  // clear the frame buffer
+        sample.point = glm::vec2(x, y);
+    });
 }
 
 void rys::reyes::set_pixel_samples(int xsamples, int ysamples)
@@ -293,3 +296,26 @@ void rys::reyes::initialize_viewport()
     viewport_matrix = glm::transpose(viewport_matrix);
 }
 
+bool rys::triangle::intersects(const glm::vec2 &point)
+{
+    auto sign =[](const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3)
+    {
+        return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+    };
+
+    float d1, d2, d3;
+    bool has_neg, has_pos;
+
+    auto v1 = a;
+    auto v2 = b;
+    auto v3 = c;
+
+    d1 = sign(point, v1, v2);
+    d2 = sign(point, v2, v3);
+    d3 = sign(point, v3, v1);
+
+    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(has_neg && has_pos);
+}

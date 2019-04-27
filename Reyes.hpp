@@ -16,11 +16,19 @@ namespace rys
         const glm::vec2i& cross;
     };
 
+    struct sample
+    {
+        glm::vec3 color;
+        glm::vec2 point;
+    };
+
     struct triangle
     {
         const glm::vec2i& a;
         const glm::vec2i& b;
         const glm::vec2i& c;
+
+        bool intersects(const glm::vec2& point);
     };
 
     enum class Display_Type
@@ -53,6 +61,7 @@ namespace rys
 
         void render(const rys::Sphere& sphere); // for debugging purposes, won't be used for release!
         void paint_pixel(int x, int y, const glm::vec3& color);
+        rys::sample get_pixel(int x, int y);
 
         glm::mat4 get_current_matrix() const { return current_matrix; }
         void push_current_matrix();
@@ -72,7 +81,7 @@ namespace rys
         void set_pixel_samples(int xsamples, int ysamples);
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
 
-        std::vector<glm::vec3>& get_frame_buffer();
+        std::vector<sample>& get_frame_buffer();
         void initialize_buffers();
         void initialize_viewport();
 
@@ -100,7 +109,7 @@ namespace rys
         int current_frame;
         std::string name;
 
-        std::vector<glm::vec3> frame_buffer;
+        std::vector<sample> frame_buffer;
 
         unsigned int real_width;
         unsigned int real_height;
@@ -133,6 +142,6 @@ namespace rys
         std::stack<glm::mat4> transform_stack;
 
         glm::vec<2, int, glm::defaultp> get_ss_coords(const glm::vec4& point);
-//        std::vector<int> find_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
+        void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
     };
 }
