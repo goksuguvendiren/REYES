@@ -10,10 +10,12 @@ namespace rys
 {
     struct polygon
     {
-        const glm::vec2i& current;
-        const glm::vec2i& right;
-        const glm::vec2i& below;
-        const glm::vec2i& cross;
+        const glm::vec3 current;
+        const glm::vec3 right;
+        const glm::vec3 below;
+        const glm::vec3 cross;
+
+        float get_average_depth() const;
     };
 
     struct sample
@@ -24,9 +26,9 @@ namespace rys
 
     struct triangle
     {
-        const glm::vec2i& a;
-        const glm::vec2i& b;
-        const glm::vec2i& c;
+        const glm::vec2i a;
+        const glm::vec2i b;
+        const glm::vec2i c;
 
         bool intersects(const glm::vec2& point);
     };
@@ -62,6 +64,8 @@ namespace rys
         void render(const rys::Sphere& sphere); // for debugging purposes, won't be used for release!
         void paint_pixel(int x, int y, const glm::vec3& color);
         rys::sample get_pixel(int x, int y);
+        float get_depth(int x, int y);
+        void set_depth(int x, int y, float n_depth);
 
         glm::mat4 get_current_matrix() const { return current_matrix; }
         void push_current_matrix();
@@ -81,7 +85,8 @@ namespace rys
         void set_pixel_samples(int xsamples, int ysamples);
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
 
-        std::vector<sample>& get_frame_buffer();
+        std::vector<sample>& create_frame_buffer();
+        std::vector<float>& create_depth_buffer();
         void initialize_buffers();
         void initialize_viewport();
 
@@ -110,6 +115,7 @@ namespace rys
         std::string name;
 
         std::vector<sample> frame_buffer;
+        std::vector<float> depth_buffer;
 
         unsigned int real_width;
         unsigned int real_height;
@@ -141,7 +147,7 @@ namespace rys
 
         std::stack<glm::mat4> transform_stack;
 
-        glm::vec<2, int, glm::defaultp> get_ss_coords(const glm::vec4& point);
+        glm::vec3 get_ss_coords(const glm::vec4& point);
         void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
     };
 }

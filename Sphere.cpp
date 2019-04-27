@@ -14,7 +14,7 @@ rys::Mesh rys::Sphere::dice() const
 
     std::vector<std::vector<glm::vec4>> samples;
 
-    float res = 36 / 360.f;
+    float res = 10 / 360.f;
     for (float u = 0; u <= 1; u += res)
     {
         std::vector<glm::vec4> line;
