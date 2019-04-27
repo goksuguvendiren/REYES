@@ -160,6 +160,7 @@ void RiFrameBegin(RtInt frame)
 {
     rys::renderer->set_cur_frame_id(frame);
     rys::renderer->initialize_buffers();
+    rys::renderer->initialize_viewport();
 }
 
 void RiFrameEnd()
@@ -200,6 +201,7 @@ void RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax, ...)
 
 void RiColor(RtColor color)
 {
+    rys::renderer->set_color({color[0], color[1], color[2]});
     rys::renderer->set_color({color[0], color[1], color[2]});
 }
 
