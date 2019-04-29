@@ -12,16 +12,6 @@ namespace rys
 {
     struct polygon
     {
-        glm::vec3 current;
-        glm::vec3 right;
-        glm::vec3 below;
-        glm::vec3 cross;
-
-        float get_average_depth() const;
-    };
-
-    struct polygon_grid
-    {
         Grid current;
         Grid right;
         Grid below;
@@ -171,7 +161,6 @@ namespace rys
         std::function<void(surface_shader_payload&)> surface_shader;
 
         std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly);
-        std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon_grid& mpoly);
 
         float near;
         float far;
@@ -184,6 +173,5 @@ namespace rys
 
         glm::vec3 get_ss_coords(const glm::vec4& point);
         void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
-        void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon_grid& mpoly);
     };
 }
