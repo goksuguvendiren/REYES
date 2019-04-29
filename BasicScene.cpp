@@ -3,6 +3,7 @@
 #include <string>
 #include "Ri.h"
 #include "glm_ostream.hpp"
+#include "shaders.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -51,20 +52,21 @@ void Earth()
 
         RiWorldBegin();
             RiColor(blue);
+            RiSurface(nullptr);
             RiTransformBegin();
                 RiTranslate(0, 0, 5.0);
                 RiRotate(-175, 0, 1, 0);
                 RiRotate(110, 1, 0, 0);
                 RiSphere(1, -1, 1, 360);
             RiTransformEnd();
-
-            RiColor(red);
-            RiTransformBegin();
-                RiTranslate(100, 100, 8.0);
-                RiRotate(-175, 0, 1, 0);
-                RiRotate(110, 1, 0, 0);
-                RiSphere(0.5, -1, 1, 360);
-            RiTransformEnd();
+//
+//            RiColor(red);
+//            RiTransformBegin();
+//                RiTranslate(0, 0, 8.0);
+//                RiRotate(-175, 0, 1, 0);
+//                RiRotate(110, 1, 0, 0);
+//                RiSphere(0.5, -1, 1, 360);
+//            RiTransformEnd();
         RiWorldEnd();
 
     RiFrameEnd();

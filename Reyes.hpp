@@ -4,7 +4,9 @@
 #include "Sphere.hpp"
 #include <iostream>
 #include <stack>
+#include <functional>
 #include "glm_ostream.hpp"
+#include "shaders.hpp"
 
 namespace rys
 {
@@ -55,6 +57,16 @@ namespace rys
         Orthographic
     };
 
+    inline glm::vec4 default_displacement_shader(const glm::vec4& position)
+    {
+        return position;
+    }
+
+    inline void default_surface_shader(surface_shader_payload& payload)
+    {
+        payload.color = payload.color;
+    }
+
     class reyes
     {
     public:
@@ -84,6 +96,10 @@ namespace rys
 
         void set_pixel_samples(int xsamples, int ysamples);
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
+
+        // shaders:
+        void set_displacement_shader(std::function<glm::vec4(const glm::vec4&)> ds) { displacement_shader = ds; }
+        void set_surface_shader(std::function<void(surface_shader_payload&)> ss) { if (ss) surface_shader = ss; else surface_shader = default_surface_shader; }
 
         std::vector<sample>& create_frame_buffer();
         std::vector<float>& create_depth_buffer();
@@ -137,6 +153,15 @@ namespace rys
         glm::mat4 view_matrix; // world_to_camera!
         glm::mat4 current_matrix;
         glm::mat4 viewport_matrix;
+
+        // shader functions:
+        void apply_displacement_shader(Mesh& mesh);
+        void apply_surface_shader(Mesh& mesh, surface_shader_payload& payload);
+        std::function<glm::vec4(const glm::vec4&)> displacement_shader;
+        std::function<void(surface_shader_payload&)> surface_shader;
+
+        std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly);
+        std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon_grid& mpoly);
 
         float near;
         float far;

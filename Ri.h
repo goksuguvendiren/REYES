@@ -4,6 +4,10 @@
 */
 /* Definitions of Abstract Types used in RI */
 
+#include <glm/glm.hpp>
+#include <functional>
+#include "shaders.hpp"
+
 typedef short RtBoolean;
 typedef int RtInt;
 typedef float RtFloat;
@@ -142,7 +146,7 @@ extern RtLightHandle
 		RtInt n, RtToken tokens[], RtPointer parms[]);
 extern RtVoid
 	RiIlluminate(RtLightHandle light, RtBoolean onoff),
-	RiSurface(RtToken name, ...),
+	RiSurface(std::function<glm::vec4(surface_shader_payload&)>),
 	RiSurfaceV(RtToken name, RtInt n, RtToken tokens[], RtPointer parms[]),
 	RiAtmosphere(RtToken name, ...),
 	RiAtmosphereV(RtToken name,RtInt n,RtToken tokens[],RtPointer parms[]),
@@ -173,7 +177,7 @@ extern RtVoid
 		RtFloat dx2, RtFloat dy2, RtFloat dz2),
 	RiDeformation(RtToken name, ...),
 	RiDeformationV(RtToken name,RtInt n,RtToken tokens[],RtPointer parms[]),
-	RiDisplacement(RtToken name, ...),
+	RiDisplacement(std::function<glm::vec4(const glm::vec4&)> ds),
 	RiDisplacementV(RtToken name,RtInt n,RtToken tokens[],RtPointer	parms[]),
 	RiCoordinateSystem(RtToken space),
 	RiCoordSysTransform(RtToken space);
@@ -344,7 +348,7 @@ Error Codes
 #define RIE_RANGE ((RtInt)42) /* Parameter out of range */
 #define RIE_CONSISTENCY ((RtInt)43) /* Parameters inconsistent */
 #define RIE_BADHANDLE ((RtInt)44) /* Bad object/light handle */
-#define RIE_NOSHADER ((RtInt)45) /* Can¡¯t load requested shader */
+#define RIE_NOSHADER ((RtInt)45) /* Canï¿½ï¿½t load requested shader */
 #define RIE_MISSINGDATA ((RtInt)46) /* Required parameters not provided */
 #define RIE_SYNTAX ((RtInt)47) /* Declare type syntax error */
 #define RIE_MATH ((RtInt)61) /* Zerodivide, noninvert matrix, etc. */

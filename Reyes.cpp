@@ -23,6 +23,9 @@ rys::reyes::reyes(const std::string& n) : near(0.1f), far(100.f)
 
     pixel_xsamples = 1;
     pixel_ysamples = 1;
+
+    displacement_shader = rys::default_displacement_shader;
+    surface_shader      = rys::default_surface_shader;
 }
 
 void rys::reyes::world_begin()
@@ -87,7 +90,7 @@ void rys::reyes::save_frame()
     // rows, cols, type, data
     cv::Mat image(height, width, CV_32FC3, float_image.data());
     cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
-//    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
+    cv::resize(image, image, cv::Size{(int)real_width, (int)real_height});
 
 //    cimg::CImg<float> image(width, height, 1, 3, 255.f);
 //    cimg::CImg<unsigned char> img_normalized = image.get_normalize(0,255);
@@ -182,7 +185,7 @@ glm::vec3 rys::reyes::get_ss_coords(const glm::vec4& point)
     return {(int)ss_coords.x, (int)ss_coords.y, unit_cube.z};
 }
 
-std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly)
+std::pair<glm::vec2i, glm::vec2i> rys::reyes::find_bounding_box(const rys::polygon& mpoly)
 {
     glm::vec2i bb_min;
     glm::vec2i bb_max;
@@ -228,24 +231,25 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
 void rys::reyes::render(const rys::Sphere &sphere)
 {
     auto mesh = sphere.dice();
+    apply_displacement_shader(mesh);
 
-    auto samples = mesh.get_samples();
-    for (int i = 0; i < samples.size(); ++i)
+    surface_shader_payload payload;
+    payload.color = glm::vec4(get_color(), 1.0f);
+    apply_surface_shader(mesh, payload);
+
+    auto grid = mesh.get_grid();
+
+    for (int i = 0; i < grid.size(); ++i)
     {
-        for (int j = 0; j < samples[0].size(); ++j)
+        for (int j = 0; j < grid[0].size(); ++j)
         {
             auto current = get_ss_coords(samples[i][j]);
             auto right   = get_ss_coords(samples[i][(j+1) % samples[0].size()]);
             auto below   = get_ss_coords(samples[(i+1) % samples.size()][j]);
             auto cross   = get_ss_coords(samples[(i+1) % samples.size()][(j+1) % samples[0].size()]);
 
-            auto mpoly = rys::polygon{current, right, below, cross};
-
-            auto bounding_box = find_bounding_box(mpoly);
-            auto bb_min = bounding_box.first;
-            auto bb_max = bounding_box.second;
-            auto top_left = glm::vec2i{bb_min.x, bb_min.y};
-            auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
+                auto mpoly = rys::polygon{current, right, below, cross};
+                auto bounding_box = find_bounding_box(mpoly);
 
             paint_intersecting_samples(bounding_box, mpoly);
         }
@@ -343,4 +347,29 @@ bool rys::triangle::intersects(const glm::vec2 &point)
 float rys::polygon::get_average_depth() const
 {
     return (current.z + right.z + below.z + cross.z) / 4.f;
+}
+
+float rys::polygon_grid::get_average_depth() const
+{
+    return (current.position.z + right.position.z + below.position.z + cross.position.z) / 4.f;
+}
+
+void rys::reyes::apply_displacement_shader(rys::Mesh& mesh)
+{
+    // create the variables that'll be passed to the shader
+    displacement_shader(mesh.get_grid()[0][0].position);
+}
+
+void rys::reyes::apply_surface_shader(rys::Mesh& mesh, surface_shader_payload& payload)
+{
+    // create the variables that'll be passed to the shader
+    for (auto& line : mesh.get_grid())
+    {
+        for (auto& grid : line)
+        {
+            payload.color = glm::vec4(get_color(), 1.0f);
+            surface_shader(payload);
+            grid.color = payload.color;
+        }
+    }
 }

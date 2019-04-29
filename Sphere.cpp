@@ -12,14 +12,15 @@ rys::Mesh rys::Sphere::dice() const
     auto phi_min = zmin > -radius ? std::asin(zmin / radius) : -90.0f;
     auto phi_max = zmax < radius  ? std::asin(zmax / radius) :  90.0f;
 
-    std::vector<std::vector<glm::vec4>> samples;
+    std::vector<std::vector<Grid>> samples;
 
     float res = 10 / 360.f;
     for (float u = 0; u <= 1; u += res)
     {
-        std::vector<glm::vec4> line;
+        std::vector<Grid> line;
         for (float v = 0; v <= 1; v += res * 2)
         {
+            Grid g;
 //            std::cerr << u << ", " << v << ": ";
             auto phi = phi_min + v * (phi_max - phi_min);
             auto theta = u * tmax;
@@ -34,7 +35,8 @@ rys::Mesh rys::Sphere::dice() const
 //            std::cerr << x << ", " << y << ", " << z << "\n";
             glm::vec4 local_coord = glm::vec4(x, y, z, 1.0f);
             auto world_coord = model_transf * local_coord;
-            line.emplace_back(world_coord);
+            g.position = world_coord;
+            line.emplace_back(g);
         }
         samples.push_back(line);
     }

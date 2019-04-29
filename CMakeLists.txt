@@ -9,7 +9,7 @@ find_package(OpenCV REQUIRED)
 
 include_directories(/usr/local/include/)
 
-set(SOURCE_FILES BasicScene.cpp Ri.cpp Reyes.cpp Sphere.cpp Sphere.hpp glm_ostream.hpp Mesh.cpp Mesh.hpp)
+set(SOURCE_FILES BasicScene.cpp Ri.cpp Reyes.cpp Sphere.cpp Sphere.hpp glm_ostream.hpp Mesh.cpp Mesh.hpp shaders.hpp shaders.cpp)
 add_executable(REYES ${SOURCE_FILES})
 #target_link_libraries(REYES X11)
 #target_link_libraries(REYES Threads::Threads)
