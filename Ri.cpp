@@ -244,7 +244,7 @@ void RiDisplacement(std::function<glm::vec4(const glm::vec4&)> ds)
     rys::renderer->set_displacement_shader(ds);
 }
 
-void RiSurface(std::function<glm::vec4(surface_shader_payload&)> ss)
+void RiSurface(std::function<void(surface_shader_payload&)> ss)
 {
     rys::renderer->set_surface_shader(ss);
 }

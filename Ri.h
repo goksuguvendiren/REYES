@@ -146,7 +146,7 @@ extern RtLightHandle
 		RtInt n, RtToken tokens[], RtPointer parms[]);
 extern RtVoid
 	RiIlluminate(RtLightHandle light, RtBoolean onoff),
-	RiSurface(std::function<glm::vec4(surface_shader_payload&)>),
+	RiSurface(std::function<void(surface_shader_payload&)>),
 	RiSurfaceV(RtToken name, RtInt n, RtToken tokens[], RtPointer parms[]),
 	RiAtmosphere(RtToken name, ...),
 	RiAtmosphereV(RtToken name,RtInt n,RtToken tokens[],RtPointer parms[]),

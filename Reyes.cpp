@@ -230,7 +230,7 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
             {
                 if (get_depth(j, i) > average_depth)
                 {
-                    paint_pixel(j, i, get_color());
+                    paint_pixel(j, i, mpoly.current.color);
                     set_depth(j, i, average_depth);
                 }
             }
@@ -244,7 +244,6 @@ void rys::reyes::render(const rys::Sphere &sphere)
     apply_displacement_shader(mesh);
 
     surface_shader_payload payload;
-    payload.color = glm::vec4(get_color(), 1.0f);
     apply_surface_shader(mesh, payload);
 
     auto grid = mesh.get_grid();
@@ -373,7 +372,11 @@ void rys::reyes::apply_surface_shader(rys::Mesh& mesh, surface_shader_payload& p
         for (auto& grid : line)
         {
             payload.color = glm::vec4(get_color(), 1.0f);
+            payload.position = grid.position;
+            payload.normal = grid.normal;
             surface_shader(payload);
+
+            // output color:
             grid.color = payload.color;
         }
     }

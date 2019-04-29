@@ -52,7 +52,7 @@ void Earth()
 
         RiWorldBegin();
             RiColor(blue);
-            RiSurface(nullptr);
+            RiSurface(PHONG);
             RiTransformBegin();
                 RiTranslate(0, 0, 5.0);
                 RiRotate(-175, 0, 1, 0);

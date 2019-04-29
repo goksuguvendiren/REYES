@@ -24,6 +24,6 @@ namespace rys
     public:
         explicit Mesh(std::vector<std::vector<Grid>> g) : grid(std::move(g)) {}
 
-        std::vector<std::vector<Grid>> get_grid() { return grid; }
+        std::vector<std::vector<Grid>>& get_grid() { return grid; }
     };
 }

@@ -14,7 +14,7 @@ rys::Mesh rys::Sphere::dice() const
 
     std::vector<std::vector<Grid>> samples;
 
-    float res = 10 / 360.f;
+    float res = 1 / 360.f;
     for (float u = 0; u <= 1; u += res)
     {
         std::vector<Grid> line;
@@ -34,8 +34,11 @@ rys::Mesh rys::Sphere::dice() const
 
 //            std::cerr << x << ", " << y << ", " << z << "\n";
             glm::vec4 local_coord = glm::vec4(x, y, z, 1.0f);
-            auto world_coord = model_transf * local_coord;
+            glm::vec4 normal = (local_coord - glm::vec4{0, 0, 0, 1.0f});
+
+            glm::vec4 world_coord = model_transf * local_coord;
             g.position = world_coord;
+            g.normal = glm::normalize(world_coord - cent);
             line.emplace_back(g);
         }
         samples.push_back(line);
