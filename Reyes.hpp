@@ -12,10 +12,20 @@ namespace rys
 {
     struct polygon
     {
-        const glm::vec3 current;
-        const glm::vec3 right;
-        const glm::vec3 below;
-        const glm::vec3 cross;
+        glm::vec3 current;
+        glm::vec3 right;
+        glm::vec3 below;
+        glm::vec3 cross;
+
+        float get_average_depth() const;
+    };
+
+    struct polygon_grid
+    {
+        Grid current;
+        Grid right;
+        Grid below;
+        Grid cross;
 
         float get_average_depth() const;
     };
@@ -28,9 +38,9 @@ namespace rys
 
     struct triangle
     {
-        const glm::vec2i a;
-        const glm::vec2i b;
-        const glm::vec2i c;
+        glm::vec3 a;
+        glm::vec3 b;
+        glm::vec3 c;
 
         bool intersects(const glm::vec2& point);
     };
@@ -174,5 +184,6 @@ namespace rys
 
         glm::vec3 get_ss_coords(const glm::vec4& point);
         void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
+        void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon_grid& mpoly);
     };
 }

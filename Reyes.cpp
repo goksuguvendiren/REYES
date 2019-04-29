@@ -199,6 +199,25 @@ std::pair<glm::vec2i, glm::vec2i> rys::reyes::find_bounding_box(const rys::polyg
     return {bb_min, bb_max};
 }
 
+std::pair<glm::vec2i, glm::vec2i> rys::reyes::find_bounding_box(const rys::polygon_grid& mpoly)
+{
+    glm::vec2i bb_min;
+    glm::vec2i bb_max;
+
+    auto current = get_ss_coords(mpoly.current.position);
+    auto right = get_ss_coords(mpoly.right.position);
+    auto below = get_ss_coords(mpoly.below.position);
+    auto cross = get_ss_coords(mpoly.cross.position);
+
+    bb_min.x = std::min(std::min(std::min(current.x, right.x), below.x), cross.x);
+    bb_min.y = std::min(std::min(std::min(current.y, right.y), below.y), cross.y);
+
+    bb_max.x = std::max(std::max(std::max(current.x, right.x), below.x), cross.x);
+    bb_max.y = std::max(std::max(std::max(current.y, right.y), below.y), cross.y);
+
+    return {bb_min, bb_max};
+}
+
 void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly)
 {
     auto bb_min = bb.first;
@@ -210,6 +229,40 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
 
     auto tri1 = rys::triangle{mpoly.current, mpoly.right, mpoly.below};
     auto tri2 = rys::triangle{mpoly.right, mpoly.below, mpoly.cross};
+
+    for (int i = top_left.y; i <= bot_right.y; ++i)
+    {
+        for (int j = top_left.x; j <= bot_right.x; ++j)
+        {
+            auto ss_coord = glm::vec2{get_pixel(j, i).point.x + j, get_pixel(j, i).point.y + i};
+            if (tri1.intersects(ss_coord) || tri2.intersects(ss_coord))
+            {
+                if (get_depth(j, i) > average_depth)
+                {
+                    paint_pixel(j, i, get_color());
+                    set_depth(j, i, average_depth);
+                }
+            }
+        }
+    }
+}
+
+void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon_grid& mpoly)
+{
+    auto bb_min = bb.first;
+    auto bb_max = bb.second;
+    auto top_left = glm::vec2i{bb_min.x, bb_min.y};
+    auto bot_right = glm::vec2i{bb_max.x, bb_max.y};
+
+    float average_depth = mpoly.get_average_depth();
+
+    auto current = get_ss_coords(mpoly.current.position);
+    auto right = get_ss_coords(mpoly.right.position);
+    auto below = get_ss_coords(mpoly.below.position);
+    auto cross = get_ss_coords(mpoly.cross.position);
+
+    auto tri1 = rys::triangle{current, right, below};
+    auto tri2 = rys::triangle{right, below, cross};
 
     for (int i = top_left.y; i <= bot_right.y; ++i)
     {
@@ -243,14 +296,15 @@ void rys::reyes::render(const rys::Sphere &sphere)
     {
         for (int j = 0; j < grid[0].size(); ++j)
         {
-            auto current = get_ss_coords(samples[i][j]);
-            auto right   = get_ss_coords(samples[i][(j+1) % samples[0].size()]);
-            auto below   = get_ss_coords(samples[(i+1) % samples.size()][j]);
-            auto cross   = get_ss_coords(samples[(i+1) % samples.size()][(j+1) % samples[0].size()]);
+            auto current = grid[i][j];
+            auto right   = grid[i][(j+1) % grid[0].size()];
+            auto below   = grid[(i+1)    % grid.size()][j];
+            auto cross   = grid[(i+1)    % grid.size()][(j+1) % grid[0].size()];
 
-                auto mpoly = rys::polygon{current, right, below, cross};
-                auto bounding_box = find_bounding_box(mpoly);
+            auto mpoly = rys::polygon_grid{current, right, below, cross};
+            auto bounding_box = find_bounding_box(mpoly);
 
+            std::cerr << bounding_box.first << " - " << bounding_box.second << '\n';
             paint_intersecting_samples(bounding_box, mpoly);
         }
     }
