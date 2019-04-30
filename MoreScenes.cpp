@@ -118,7 +118,7 @@ void ShaderTest()
 					opacity[0] = 1; opacity[1] = 1; opacity[2] = 1;
 					RiOpacity(opacity);
 					RiMakeTexture("earth.jpg", 0);
-					void (*earthShader)(void) = TextureMap0;
+//					void (*earthShader)(void) = TextureMap0;
 					RiSurface(earthShader);
 					BUMP_AMPLITUDE = 1;
 					BUMP_MIN_FREQ_EXP = 2;

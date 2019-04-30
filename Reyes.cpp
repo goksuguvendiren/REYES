@@ -26,6 +26,8 @@ rys::reyes::reyes(const std::string& n) : near(0.1f), far(100.f)
 
     displacement_shader = rys::default_displacement_shader;
     surface_shader      = rys::default_surface_shader;
+
+    texture = std::nullopt;
 }
 
 void rys::reyes::world_begin()
@@ -245,6 +247,7 @@ void rys::reyes::render(const rys::Sphere &sphere)
     apply_displacement_shader(mesh);
 
     surface_shader_payload payload;
+    if (texture) payload.texture = &(*texture);
     apply_surface_shader(mesh, payload);
 
     auto grid = mesh.get_grid();

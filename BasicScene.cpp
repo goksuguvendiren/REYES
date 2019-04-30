@@ -53,7 +53,10 @@ void Earth()
         RiWorldBegin();
             RiColor(blue);
             RiSurface(CHECKERBOARD);
+//            RiDisplacement(BUMPY);
             RiTransformBegin();
+                RiMakeTexture("../earth.jpg", 0);
+                RiSurface(EARTHSHADER);
                 RiTranslate(0, 0, 5.0);
                 RiRotate(-175, 0, 1, 0);
                 RiRotate(110, 1, 0, 0);

@@ -7,6 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
+#include "Texture.hpp"
 
 struct surface_shader_payload
 {
@@ -14,6 +15,7 @@ struct surface_shader_payload
     glm::vec4 position;
     glm::vec4 color;
     glm::vec4 normal;
+    Texture* texture;
 };
 
 // displacement_shader
@@ -24,3 +26,5 @@ void NONE(surface_shader_payload& payload);
 void CHECKERBOARD(surface_shader_payload& payload);
 
 void PHONG(surface_shader_payload& payload);
+
+void EARTHSHADER(surface_shader_payload& payload);

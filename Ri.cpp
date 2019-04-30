@@ -248,3 +248,8 @@ void RiSurface(std::function<void(surface_shader_payload&)> ss)
 {
     rys::renderer->set_surface_shader(ss);
 }
+
+void RiMakeTexture(char *pic, char *tex)
+{
+    rys::renderer->set_texture(std::string(pic));
+}

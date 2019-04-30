@@ -283,8 +283,7 @@ extern RtVoid
 	RiMotionBeginV(RtInt n, RtFloat times[]),
 	RiMotionEnd(void) ;
 extern RtVoid
-	RiMakeTexture(char *pic, char *tex, RtToken swrap, RtToken twrap,
-	RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ...),
+	RiMakeTexture(char *pic, char *tex),
 	RiMakeTextureV(char *pic, char *tex, RtToken swrap, RtToken twrap,
 	RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
 		RtInt n, RtToken tokens[], RtPointer parms[]),

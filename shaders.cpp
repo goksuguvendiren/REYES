@@ -8,10 +8,20 @@
 #include <glm/ext/scalar_constants.hpp>
 #include <iostream>
 
-glm::vec4 BUMPY(const glm::vec4& position)
-{
-
-}
+//glm::vec4 BUMPY(const glm::vec4& position)
+//{
+//    auto floor = [](float p) { return int(p / 1.f); };
+//    for (int i = floor(position.x); i <= floor(position.x) + 1; ++i)
+//    {
+//        for (int j = floor(position.y); j <= floor(position.y) + 1; ++j)
+//        {
+//            for (int k = floor(position.z); k <= floor(position.z) + 1; ++k)
+//            {
+//
+//            }
+//        }
+//    }
+//}
 
 void NONE(surface_shader_payload& payload)
 {
@@ -80,4 +90,10 @@ void PHONG(surface_shader_payload& payload)
 
     // output color:
     payload.color = ambient + diffuse; //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+}
+
+void EARTHSHADER(surface_shader_payload& payload)
+{
+    auto texture = payload.texture;
+    payload.color = glm::vec4{texture->query(payload.uv.x, payload.uv.y) / 255.f, 1.0f};
 }

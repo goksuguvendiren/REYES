@@ -3,10 +3,12 @@
 #include <glm/glm.hpp>
 #include "Sphere.hpp"
 #include <iostream>
+#include <optional>
 #include <stack>
 #include <functional>
 #include "glm_ostream.hpp"
 #include "shaders.hpp"
+#include "Texture.hpp"
 
 namespace rys
 {
@@ -107,6 +109,7 @@ namespace rys
         void initialize_viewport();
 
         void set_format(int xres, int yres, float pix_asp_ratio);
+        void set_texture(const std::string& filename) { texture = Texture(filename); }
 
         void set_color(const glm::vec3& col) { current_color = col; }
         glm::vec3 get_color() const { return current_color; }
@@ -161,6 +164,8 @@ namespace rys
         std::function<void(surface_shader_payload&)> surface_shader;
 
         std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly);
+
+        std::optional<Texture> texture;
 
         float near;
         float far;
