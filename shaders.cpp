@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <cassert>
 #include <glm/ext/scalar_constants.hpp>
+#include <iostream>
 
 glm::vec4 BUMPY(const glm::vec4& position)
 {
@@ -19,37 +20,64 @@ void NONE(surface_shader_payload& payload)
 
 void CHECKERBOARD(surface_shader_payload& payload)
 {
+    bool u_white = (int(payload.uv.x * 20) % 2) == 1;
+    bool v_white = (int(payload.uv.y * 15) % 2) == 1;
 
+    std::cout << payload.uv.x <<'\n';
+
+    if (v_white)
+    {
+        if (u_white)
+        {
+            payload.color = glm::vec4{1, 1, 1, 1.f};
+        }
+        else payload.color = glm::vec4(0, 0, 0, 1.f);
+    }
+    else
+    {
+        if (!u_white)
+        {
+            payload.color = glm::vec4{1, 1, 1, 1.f};
+        }
+        else payload.color = glm::vec4(0, 0, 0, 1.f);
+    }
 }
 
-static glm::vec3 reflect(const glm::vec3& vec, const glm::vec3& axis)
+static glm::vec4 reflect(const glm::vec3& vec, const glm::vec3& axis)
 {
 //    assert(glm::length(vec) == 1 && glm::length(axis) == 1);
 
-    auto angle = glm::dot(vec, axis);
-
-    return glm::normalize(axis - vec);
-//    return glm::normalize(2 * angle * axis - vec);
+    auto costheta = glm::dot(glm::vec3(vec), glm::vec3(axis));
+    return glm::vec4(2 * costheta * axis - vec, 0.f);
 }
-
-//glm::vec4 eye_pos{0, 0, 0, 1.0f};
-//auto view = eye_pos - point;
-//
-//auto R = reflect(glm::normalize(light_dir), normal);
-//auto specular = glm::dot(R, glm::normalize(view));
-//specular = std::pow(specular, 10);
 
 void PHONG(surface_shader_payload& payload)
 {
-    glm::vec4 light_position{-2, -2, -10, 1.f};
-    glm::vec4 light_intensity{5, 5, 5, 1};
+    float ka = 0.1;
+    float kd = 0.6;
+    float ks = 0.3;
 
-    auto point = payload.position;
-    auto normal = payload.normal;
-    auto light_dir = light_position - point;
+    glm::vec4 light_position{2, -2, -10, 1.f};
+    glm::vec4 light_intensity{2, 2, 2, 1};
+    glm::vec4 eye_pos{0, 0, 0, 1.0f};
 
-    auto cosalpha = glm::dot(glm::vec3(normal), glm::vec3(glm::normalize(light_dir)));
+    glm::vec4 color = payload.color; // TODO : if texture, sample this color from the texture.
+    glm::vec4 point = payload.position;
+    glm::vec4 normal = payload.normal;
+
+    glm::vec4 light_dir = glm::normalize(light_position - point);
+    glm::vec4 view_dir  = glm::normalize(eye_pos - point);
+
+    glm::vec4 R = reflect(light_dir, normal);
+
+    auto cosalpha = glm::dot(glm::vec3(normal), glm::vec3(light_dir));
+
+    float p = 10;
+
+    auto ambient = ka * color;
+    auto diffuse = kd * color * light_intensity * std::max(0.f, cosalpha);
+    auto specular = ks * light_intensity * std::pow(std::max(0.f, glm::dot(R, view_dir)), p);
 
     // output color:
-    payload.color = payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+    payload.color = ambient + diffuse; //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
 }

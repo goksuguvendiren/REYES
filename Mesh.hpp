@@ -16,6 +16,7 @@ namespace rys
         glm::vec4 normal;
         glm::vec4 tangent;
         glm::vec3 ss_coords;
+        glm::vec2 uv;
     };
 
     class Mesh

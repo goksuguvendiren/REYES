@@ -39,6 +39,7 @@ rys::Mesh rys::Sphere::dice() const
             glm::vec4 world_coord = model_transf * local_coord;
             g.position = world_coord;
             g.normal = glm::normalize(world_coord - cent);
+            g.uv = glm::vec2(u, v);
             line.emplace_back(g);
         }
         samples.push_back(line);

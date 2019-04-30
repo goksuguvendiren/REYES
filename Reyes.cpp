@@ -99,8 +99,9 @@ void rys::reyes::save_frame()
 //    std::cerr << img_normalized.width() << '\n';
 //    std::cerr << img_normalized.height() << '\n';
 
-    cv::imshow("debug", image);
-    cv::waitKey(0);
+    //cv::imshow("debug", image);
+    cv::imwrite("output.png", image * 255);
+    //cv::waitKey(0);
 
     return;
     switch(disp_type)
@@ -374,6 +375,7 @@ void rys::reyes::apply_surface_shader(rys::Mesh& mesh, surface_shader_payload& p
             payload.color = glm::vec4(get_color(), 1.0f);
             payload.position = grid.position;
             payload.normal = grid.normal;
+            payload.uv = grid.uv;
             surface_shader(payload);
 
             // output color:
