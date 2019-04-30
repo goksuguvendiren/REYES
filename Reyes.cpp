@@ -99,9 +99,9 @@ void rys::reyes::save_frame()
 //    std::cerr << img_normalized.width() << '\n';
 //    std::cerr << img_normalized.height() << '\n';
 
-    //cv::imshow("debug", image);
+    cv::imshow("debug", image);
     cv::imwrite("output.png", image * 255);
-    //cv::waitKey(0);
+    cv::waitKey(0);
 
     return;
     switch(disp_type)

@@ -23,7 +23,7 @@ void CHECKERBOARD(surface_shader_payload& payload)
     bool u_white = (int(payload.uv.x * 20) % 2) == 1;
     bool v_white = (int(payload.uv.y * 15) % 2) == 1;
 
-    std::cout << payload.uv.x <<'\n';
+//    std::cout << payload.uv.x <<'\n';
 
     if (v_white)
     {
