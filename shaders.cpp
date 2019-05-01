@@ -7,24 +7,19 @@
 #include <cassert>
 #include <glm/ext/scalar_constants.hpp>
 #include <iostream>
+#include "Perlin.hpp"
+#include "glm_ostream.hpp"
 
 //extern int CHECK_SIZE_X;
 //extern int CHECK_SIZE_Y;
 
-//glm::vec4 BUMPY(const glm::vec4& position)
-//{
-//    auto floor = [](float p) { return int(p / 1.f); };
-//    for (int i = floor(position.x); i <= floor(position.x) + 1; ++i)
-//    {
-//        for (int j = floor(position.y); j <= floor(position.y) + 1; ++j)
-//        {
-//            for (int k = floor(position.z); k <= floor(position.z) + 1; ++k)
-//            {
-//
-//            }
-//        }
-//    }
-//}
+glm::vec3 BUMPY(const glm::vec3& position, const glm::vec3& normal)
+{
+    static rys::Perlin noise(10, rys::Noise_Appeareance::Patch);
+    float z = noise.query(position) * 0.1f;
+
+    return position + z * normal;
+}
 
 void NONE(surface_shader_payload& payload)
 {
@@ -45,6 +40,10 @@ void UV(surface_shader_payload& payload)
     payload.color = {0, payload.uv.y, 0, 1.0f};
 }
 
+void POS(surface_shader_payload& payload)
+{
+    payload.color = glm::vec4(payload.position, 1.0f);
+}
 
 static glm::vec4 reflect(const glm::vec3& vec, const glm::vec3& axis)
 {
@@ -60,7 +59,7 @@ void PHONG(surface_shader_payload& payload)
     float kd = 0.6;
     float ks = 0.3;
 
-    glm::vec3 light_position{2, -2, -10};
+    glm::vec3 light_position{2, -10, -10};
     glm::vec3 light_intensity{0, 0, 5};
     glm::vec3 eye_pos{0, 0, 0};
 
@@ -75,14 +74,16 @@ void PHONG(surface_shader_payload& payload)
 
     auto cosalpha = glm::dot(normal, light_dir);
 
-    float p = 10;
+    float p = 2;
 
     auto ambient = ka * color;
     auto diffuse = kd * color * light_intensity * std::max(0.f, cosalpha);
     auto specular = ks * light_intensity * std::pow(std::max(0.f, glm::dot(R, view_dir)), p);
 
+//    std::cout << specular << '\n';
+
     // output color:
-    payload.color = glm::vec4(ambient + diffuse, 1.0f); //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+    payload.color = glm::vec4(ambient + diffuse + specular, 1.0f); //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
 }
 
 void NORMAL(surface_shader_payload& payload)
@@ -94,4 +95,13 @@ void EARTHSHADER(surface_shader_payload& payload)
 {
     auto texture = payload.texture;
     payload.color = glm::vec4{texture->query(payload.uv.x, payload.uv.y) / 255.f, 1.0f};
+}
+
+void NOISE(surface_shader_payload& payload)
+{
+    static rys::Perlin noise(10, rys::Noise_Appeareance::Patch);
+    float z = noise.query(payload.position);
+
+//    return position + z * normal;
+    payload.color = glm::vec4{z, z, z, 1.0f};
 }

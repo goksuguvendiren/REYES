@@ -15,10 +15,10 @@ rys::Mesh rys::Sphere::dice() const
     std::vector<std::vector<Grid>> samples;
 
     float res = 1 / 360.f;
-    for (float u = 0; u <= 1; u += res)
+    for (float v = 0; v <= 1; v += res)
     {
         std::vector<Grid> line;
-        for (float v = 0; v <= 1; v += res * 2)
+        for (float u = 0; u <= 1; u += res)
         {
             Grid g;
             auto phi = phi_min + v * (phi_max - phi_min);

@@ -19,7 +19,7 @@ struct surface_shader_payload
 };
 
 // displacement_shader
-glm::vec4 BUMPY(const glm::vec4& position);
+glm::vec3 BUMPY(const glm::vec3& position, const glm::vec3& normal);
 
 void NONE(surface_shader_payload& payload);
 
@@ -27,9 +27,11 @@ void NONE(surface_shader_payload& payload);
 //int CHECK_SIZE_Y;
 
 void CHECKERBOARD(surface_shader_payload& payload);
+void POS(surface_shader_payload& payload);
 
 void UV(surface_shader_payload& payload);
 void NORMAL(surface_shader_payload& payload);
 void PHONG(surface_shader_payload& payload);
 
 void EARTHSHADER(surface_shader_payload& payload);
+void NOISE(surface_shader_payload& payload);

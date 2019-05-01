@@ -177,7 +177,7 @@ extern RtVoid
 		RtFloat dx2, RtFloat dy2, RtFloat dz2),
 	RiDeformation(RtToken name, ...),
 	RiDeformationV(RtToken name,RtInt n,RtToken tokens[],RtPointer parms[]),
-	RiDisplacement(std::function<glm::vec4(const glm::vec4&)> ds),
+	RiDisplacement(std::function<glm::vec3(const glm::vec3&, const glm::vec3&)> ds),
 	RiDisplacementV(RtToken name,RtInt n,RtToken tokens[],RtPointer	parms[]),
 	RiCoordinateSystem(RtToken space),
 	RiCoordSysTransform(RtToken space);

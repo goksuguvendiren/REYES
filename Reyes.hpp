@@ -13,6 +13,25 @@
 #include "Torus.hpp"
 #include "Texture.hpp"
 
+inline glm::vec3 mean(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3& d)
+{
+    return (a + b + c + d) / 4.f;
+}
+
+inline glm::vec2 mean(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& d)
+{
+    auto u_mean = (a.x + b.x + c.x + d.x) / 4.0f;
+    auto v_mean = (a.y + b.y + c.y + d.y) / 4.0f;
+
+    return {u_mean, v_mean};
+}
+
+inline glm::vec3 calculate_normal(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+{
+    // c - a x b - a
+    return glm::cross((c - a), (b - a));
+}
+
 namespace rys
 {
     struct polygon
@@ -21,6 +40,19 @@ namespace rys
         Grid right;
         Grid below;
         Grid cross;
+
+        polygon(const Grid& c, const Grid& r, const Grid& b, const Grid& cr) : current(c), right(r), below(b), cross(cr)
+        {
+            position = mean(current.position, right.position, below.position, cross.position);
+            uv = mean(current.uv, right.uv, below.uv, cross.uv);
+            normal = calculate_normal(current.position, right.position, below.position);
+            normal = glm::normalize(normal);
+        }
+
+        glm::vec4 color;
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 uv;
 
         float get_average_depth() const;
     };
@@ -62,7 +94,7 @@ namespace rys
         Orthographic
     };
 
-    inline glm::vec4 default_displacement_shader(const glm::vec4& position)
+    inline glm::vec3 default_displacement_shader(const glm::vec3& position, const glm::vec3& normal)
     {
         return position;
     }
@@ -107,7 +139,7 @@ namespace rys
         std::pair<int, int> get_pixel_samples() const { return std::make_pair(pixel_xsamples, pixel_ysamples); }
 
         // shaders:
-        void set_displacement_shader(std::function<glm::vec4(const glm::vec4&)> ds) { displacement_shader = ds; }
+        void set_displacement_shader(std::function<glm::vec3(const glm::vec3&, const glm::vec3&)> ds) { displacement_shader = ds; }
         void set_surface_shader(std::function<void(surface_shader_payload&)> ss) { if (ss) surface_shader = ss; else surface_shader = default_surface_shader; }
 
         std::vector<sample>& create_frame_buffer();
@@ -167,7 +199,8 @@ namespace rys
         // shader functions:
         void apply_displacement_shader(Mesh& mesh);
         void apply_surface_shader(Mesh& mesh, surface_shader_payload& payload);
-        std::function<glm::vec4(const glm::vec4&)> displacement_shader;
+        void apply_surface_shader(rys::polygon& mpoly);
+        std::function<glm::vec3(const glm::vec3&, const glm::vec3&)> displacement_shader;
         std::function<void(surface_shader_payload&)> surface_shader;
 
         std::pair<glm::vec2i, glm::vec2i> find_bounding_box(const rys::polygon& mpoly);
@@ -183,7 +216,7 @@ namespace rys
 
         std::stack<glm::mat4> transform_stack;
 
-        glm::vec3 get_ss_coords(const glm::vec4& point);
+        glm::vec3 get_ss_coords(const glm::vec3& point);
         void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
 
 

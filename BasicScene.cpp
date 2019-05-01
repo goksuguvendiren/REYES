@@ -44,6 +44,7 @@ void Earth()
     RtColor red={1,0,0};
     RtColor green={0,1,0};
     RtColor blue={0,0,1};
+    RtColor gray={0.5,0.5,0.5};
 
     float var = 0;
     int key = 0;
@@ -55,9 +56,10 @@ void Earth()
         //RiProjection(RI_ORTHOGRAPHIC);
 
         RiWorldBegin();
-            RiColor(blue);
+            RiColor(gray);
             RiTransformBegin();
                 RiSurface(PHONG);
+                RiDisplacement(BUMPY);
                 RiTranslate(0, 0, 5.0);
                 RiRotate(-175, 0, 1, 0);
                 RiRotate(110, 1, 0, 0);
@@ -177,8 +179,8 @@ int main()
 //	SampleScene0();
 //    BasicScene();
 //    BasicScene1();
-//    Earth();
-    Cone();
+    Earth();
+//    Cone();
 
     return 0;
 }

@@ -260,7 +260,7 @@ void RiTransformEnd()
     rys::renderer->pop_current_matrix();
 }
 
-void RiDisplacement(std::function<glm::vec4(const glm::vec4&)> ds)
+void RiDisplacement(std::function<glm::vec3(const glm::vec3&, const glm::vec3& normal)> ds)
 {
     rys::renderer->set_displacement_shader(ds);
 }

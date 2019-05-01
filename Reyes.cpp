@@ -172,9 +172,9 @@ void rys::reyes::set_depth(int x, int y, float n_depth)
     depth_buffer[ind] = n_depth;
 }
 
-glm::vec3 rys::reyes::get_ss_coords(const glm::vec4& point)
+glm::vec3 rys::reyes::get_ss_coords(const glm::vec3& point)
 {
-    auto camera = view_matrix * point;
+    auto camera = view_matrix * glm::vec4(point, 1.0f);
     auto unit_cube = proj_matrix * camera;
     unit_cube /= unit_cube.w;
 
@@ -234,7 +234,7 @@ void rys::reyes::paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec
             {
                 if (get_depth(j, i) > average_depth)
                 {
-                    paint_pixel(j, i, mpoly.current.color);
+                    paint_pixel(j, i, mpoly.color);
                     set_depth(j, i, average_depth);
                 }
             }
@@ -247,9 +247,9 @@ void rys::reyes::render(const rys::Sphere &sphere)
     auto mesh = sphere.dice();
     apply_displacement_shader(mesh);
 
-    surface_shader_payload payload;
-    if (texture) payload.texture = &(*texture);
-    apply_surface_shader(mesh, payload);
+//    surface_shader_payload payload;
+//    if (texture) payload.texture = &(*texture);
+//    apply_surface_shader(mesh, payload);
 
     auto grid = mesh.get_grid();
 
@@ -263,6 +263,7 @@ void rys::reyes::render(const rys::Sphere &sphere)
             auto cross   = grid[(i+1)    % grid.size()][(j+1) % grid[0].size()];
 
             auto mpoly = rys::polygon{current, right, below, cross};
+            apply_surface_shader(mpoly);
             auto bounding_box = find_bounding_box(mpoly);
 
             paint_intersecting_samples(bounding_box, mpoly);
@@ -379,9 +380,6 @@ void rys::reyes::render(const rys::Torus &torus)
     }
 }
 
-
-
-
 void rys::reyes::push_current_matrix()
 {
     transform_stack.push(current_matrix);
@@ -477,8 +475,16 @@ float rys::polygon::get_average_depth() const
 
 void rys::reyes::apply_displacement_shader(rys::Mesh& mesh)
 {
-    // create the variables that'll be passed to the shader
-    displacement_shader(mesh.get_grid()[0][0].position);
+    for (auto& line : mesh.get_grid())
+    {
+        for (auto& grid : line)
+        {
+            auto displaced_point = displacement_shader(grid.position, grid.normal);
+
+            // output color:
+            grid.position = displaced_point;
+        }
+    }
 }
 
 void rys::reyes::apply_surface_shader(rys::Mesh& mesh, surface_shader_payload& payload)
@@ -498,4 +504,20 @@ void rys::reyes::apply_surface_shader(rys::Mesh& mesh, surface_shader_payload& p
             grid.color = payload.color;
         }
     }
+}
+
+void rys::reyes::apply_surface_shader(rys::polygon& mpoly)
+{
+    // create the variables that'll be passed to the shader
+    surface_shader_payload payload;
+
+    if (texture) payload.texture = &(*texture);
+    payload.color = glm::vec4(get_color(), 1.0f);
+    payload.position = mpoly.position;
+    payload.normal = mpoly.normal;
+    payload.uv = mpoly.uv;
+    surface_shader(payload);
+
+    // output color:
+    mpoly.color = payload.color;
 }
