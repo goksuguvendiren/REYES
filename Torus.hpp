@@ -22,10 +22,10 @@ namespace rys
             std::vector<std::vector<Grid>> samples;
 
             float res = 10 / 360.f;
-            for (float v = 0; v <= 1; v += res)
+            for (float v = 0; v <= 1 + res; v += res)
             {
                 std::vector<Grid> line;
-                for (float u = 0; u <= 1; u += res)
+                for (float u = 0; u <= 1 + res; u += res)
                 {
                     auto theta = u * tmax;
                     auto phi   = phimin + v * (phimax - phimin);

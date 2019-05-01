@@ -47,6 +47,7 @@ namespace rys
             uv = mean(current.uv, right.uv, below.uv, cross.uv);
             normal = calculate_normal(current.position, right.position, below.position);
             normal = glm::normalize(normal);
+            color = current.color;
         }
 
         glm::vec4 color;

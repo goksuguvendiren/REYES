@@ -258,9 +258,9 @@ void rys::reyes::render(const rys::Sphere &sphere)
         for (int j = 0; j < grid[0].size(); ++j)
         {
             auto current = grid[i][j];
-            auto right   = grid[i][(j+1) % grid[0].size()];
-            auto below   = grid[(i+1)    % grid.size()][j];
-            auto cross   = grid[(i+1)    % grid.size()][(j+1) % grid[0].size()];
+            auto right   = grid[i][(j+1) == grid[0].size() ? j : j + 1];
+            auto below   = grid[(i+1) == grid.size() ? i : i + 1][j];
+            auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
 
             auto mpoly = rys::polygon{current, right, below, cross};
             apply_surface_shader(mpoly);
@@ -314,6 +314,7 @@ void rys::reyes::render(const rys::Cone &cone)
             auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
 
             auto mpoly = rys::polygon{current, right, below, cross};
+//            apply_surface_shader(mpoly);
             auto bounding_box = find_bounding_box(mpoly);
 
             paint_intersecting_samples(bounding_box, mpoly);
@@ -345,6 +346,7 @@ void rys::reyes::render(const rys::Cylinder &cylinder)
             auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
 
             auto mpoly = rys::polygon{current, right, below, cross};
+//            apply_surface_shader(mpoly);
             auto bounding_box = find_bounding_box(mpoly);
 
             paint_intersecting_samples(bounding_box, mpoly);
@@ -373,6 +375,7 @@ void rys::reyes::render(const rys::Torus &torus)
             auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
 
             auto mpoly = rys::polygon{current, right, below, cross};
+//            apply_surface_shader(mpoly);
             auto bounding_box = find_bounding_box(mpoly);
 
             paint_intersecting_samples(bounding_box, mpoly);

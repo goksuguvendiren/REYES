@@ -22,7 +22,7 @@ namespace rys
         {
             std::vector<std::vector<Grid>> samples;
 
-            float res = 10 / 360.f;
+            float res = 1 / 360.f;
             for (float v = 0; v <= 1; v += res)
             {
                 std::vector<Grid> line;
