@@ -23,6 +23,9 @@ glm::vec4 BUMPY(const glm::vec4& position);
 
 void NONE(surface_shader_payload& payload);
 
+//int CHECK_SIZE_X;
+//int CHECK_SIZE_Y;
+
 void CHECKERBOARD(surface_shader_payload& payload);
 
 void NORMAL(surface_shader_payload& payload);

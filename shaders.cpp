@@ -8,6 +8,9 @@
 #include <glm/ext/scalar_constants.hpp>
 #include <iostream>
 
+//extern int CHECK_SIZE_X;
+//extern int CHECK_SIZE_Y;
+
 //glm::vec4 BUMPY(const glm::vec4& position)
 //{
 //    auto floor = [](float p) { return int(p / 1.f); };

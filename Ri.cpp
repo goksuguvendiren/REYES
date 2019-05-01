@@ -4,12 +4,12 @@
 #include "Ri.h"
 #include "Reyes.hpp"
 #include "Sphere.hpp"
+#include "Cone.hpp"
 #include "shaders.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-//#include "cimg.h"
 
 namespace rys
 {
@@ -195,6 +195,13 @@ void RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax, ...)
     auto model = rys::renderer->get_current_matrix();
     rys::Sphere sphere(radius, zmin, zmax, tmax, model);
     rys::renderer->render(sphere);
+}
+
+void RiCone(RtFloat height, RtFloat radius, RtFloat tmax, ...)
+{
+    auto model = rys::renderer->get_current_matrix();
+    rys::Cone cone(height, radius, tmax, model);
+//    rys::renderer->render(cone);
 }
 
 void RiColor(RtColor color)
