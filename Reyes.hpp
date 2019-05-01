@@ -9,6 +9,7 @@
 #include "shaders.hpp"
 #include "Sphere.hpp"
 #include "Cone.hpp"
+#include "Cylinder.hpp"
 #include "Texture.hpp"
 
 namespace rys
@@ -78,6 +79,7 @@ namespace rys
 
         void render(const rys::Sphere& sphere); // for debugging purposes, won't be used for release!
         void render(const rys::Cone& cone); // for debugging purposes, won't be used for release!
+        void render(const rys::Cylinder& cylinder); // for debugging purposes, won't be used for release!
         void paint_pixel(int x, int y, const glm::vec3& color);
         rys::sample get_pixel(int x, int y);
         float get_depth(int x, int y);

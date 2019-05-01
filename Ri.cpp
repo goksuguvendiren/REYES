@@ -5,6 +5,7 @@
 #include "Reyes.hpp"
 #include "Sphere.hpp"
 #include "Cone.hpp"
+#include "Cylinder.hpp"
 #include "shaders.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -203,6 +204,19 @@ void RiCone(RtFloat height, RtFloat radius, RtFloat tmax, ...)
     rys::Cone cone(height, radius, tmax, model);
     rys::renderer->render(cone);
 }
+
+void RiCylinder(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax, ...)
+{
+    auto model = rys::renderer->get_current_matrix();
+    rys::Cylinder cylinder(radius, zmin, zmax, tmax, model);
+    rys::renderer->render(cylinder);
+}
+
+//void RiTorus(RtFloat majrad, RtFloat minrad, RtFloat phimin, RtFloat phimax, RtFloat tmax, ...)
+//{
+//    auto model = rys::renderer->get_current_matrix();
+//    rys::Torus torus(majrad, minrad, phimin, phimaxm, tmax);
+//}
 
 void RiColor(RtColor color)
 {

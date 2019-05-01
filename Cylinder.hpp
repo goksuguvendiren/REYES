@@ -1,21 +1,18 @@
 //
-// Created by Göksu Güvendiren on 2019-04-30.
+// Created by goksu on 4/30/19.
 //
 
 #pragma once
 
-#include <iostream>
-#include "glm/glm.hpp"
-#include "glm_ostream.hpp"
-
+#include <glm/ext/matrix_float4x4.hpp>
 #include "Mesh.hpp"
 
 namespace rys
 {
-    class Cone
+    class Cylinder
     {
     public:
-        Cone(float h, float r, float t, const glm::mat4& transf) : radius(r), height(h), tmax(t), model_transf(transf), center({0, 0, 0, 1.f})
+        Cylinder(float r, float zmn, float zmx, float t, const glm::mat4& transf) : radius(r), zmin(zmn), zmax(zmx), tmax(t), model_transf(transf)
         {}
 
         rys::Mesh dice() const
@@ -30,9 +27,9 @@ namespace rys
                 {
                     auto theta = u * tmax;
 
-                    auto x = radius * (1 - v) * std::cos(glm::radians(theta));
-                    auto y = radius * (1 - v) * std::sin(glm::radians(theta));
-                    auto z = v * height;
+                    auto x = radius * std::cos(glm::radians(theta));
+                    auto y = radius * std::sin(glm::radians(theta));
+                    auto z = v * (zmax - zmin);
 
                     glm::vec4 local_coord = glm::vec4(x, y, z, 1.0f);
                     glm::vec4 local_normal = calculate_normal(local_coord);
@@ -58,19 +55,13 @@ namespace rys
         glm::mat4 model_transf;
 
         float radius;
-        float height;
+        float zmin;
+        float zmax;
         float tmax;
-
-        glm::vec4 center;
 
         glm::vec4 calculate_normal(const glm::vec4& point) const
         {
-            auto projected = glm::vec3{point.x - center.x, point.y - center.y, 0};
-            projected = glm::normalize(projected);
-
-            auto normal = glm::vec3{projected.x * (height / radius), projected.y * (height / radius), (radius / height)};
-
-            return glm::normalize(glm::vec4(normal, 0.0f));
+            return glm::normalize(glm::vec4(point.x, point.y, 0, 0));
         }
     };
 }

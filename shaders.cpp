@@ -61,7 +61,7 @@ void PHONG(surface_shader_payload& payload)
     float ks = 0.3;
 
     glm::vec3 light_position{2, -2, -10};
-    glm::vec3 light_intensity{2, 2, 2};
+    glm::vec3 light_intensity{0, 0, 5};
     glm::vec3 eye_pos{0, 0, 0};
 
     glm::vec3 color = payload.color; // TODO : if texture, sample this color from the texture.
@@ -82,7 +82,7 @@ void PHONG(surface_shader_payload& payload)
     auto specular = ks * light_intensity * std::pow(std::max(0.f, glm::dot(R, view_dir)), p);
 
     // output color:
-    payload.color = glm::vec4(ambient + diffuse + specular, 1.0f); //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+    payload.color = glm::vec4(ambient + diffuse, 1.0f); //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
 }
 
 void NORMAL(surface_shader_payload& payload)

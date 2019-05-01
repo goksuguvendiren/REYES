@@ -122,13 +122,13 @@ void Cone()
         RiProjection(RI_PERSPECTIVE, "fov", &fov);
         //RiProjection(RI_ORTHOGRAPHIC);
         RiWorldBegin();
-//            RiTransformBegin();
+            RiTransformBegin();
                 RtColor color = {1,0,0};
-//                RiColor(color);
-//                RiTranslate(0, 0.5, 7.0);
-//                RiRotate(60, 1, 0, 0);
-//                RiTorus(1, .25, 0, 360, 360);
-//            RiTransformEnd();
+                RiColor(color);
+                RiTranslate(0, 0.5, 7.0);
+                RiRotate(60, 1, 0, 0);
+                RiTorus(1, .25, 0, 360, 360);
+            RiTransformEnd();
 //            RiTransformBegin();
                 color[0] = 0; color[1] = 1;
 //                RiColor(color);
@@ -150,7 +150,7 @@ void Cone()
                 RiColor(color);
 //                CHECK_SIZE_X = 40;
 //                CHECK_SIZE_Y = 40;
-                RiSurface(CHECKERBOARD);
+                RiSurface(PHONG);
                 RiTranslate(0, -1, 8.5);
                 RiRotate(-160, 1, 0, 0);
                 RiRotate(30, 0, 1, 0);
@@ -160,13 +160,14 @@ void Cone()
 //                CHECK_SIZE_X = 40;
 //                CHECK_SIZE_Y = 40;
 //                RiTranslate(0, 0, 7.0);
-//                RiCylinder(3, 0, 10, 360);
+//                RiRotate(-160, 1, 0, 0);
+//                RiRotate(30, 0, 1, 0);
+//                RiCone(2, 1, 360);
 //            RiTransformEnd();
         RiWorldEnd();
     RiFrameEnd();
 
     RiEnd();
-
 }
 
 int main()
