@@ -201,7 +201,7 @@ void RiCone(RtFloat height, RtFloat radius, RtFloat tmax, ...)
 {
     auto model = rys::renderer->get_current_matrix();
     rys::Cone cone(height, radius, tmax, model);
-//    rys::renderer->render(cone);
+    rys::renderer->render(cone);
 }
 
 void RiColor(RtColor color)

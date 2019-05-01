@@ -21,18 +21,13 @@ rys::Mesh rys::Sphere::dice() const
         for (float v = 0; v <= 1; v += res * 2)
         {
             Grid g;
-//            std::cerr << u << ", " << v << ": ";
             auto phi = phi_min + v * (phi_max - phi_min);
             auto theta = u * tmax;
 //
-//            std::cout << phi << ", ";
-//            std::cout << theta << '\n';
-
             auto x = radius * std::cos(glm::radians(phi)) * std::cos(glm::radians(theta));
             auto y = radius * std::sin(glm::radians(phi));
             auto z = radius * std::cos(glm::radians(phi)) * std::sin(glm::radians(theta));
 
-//            std::cerr << x << ", " << y << ", " << z << "\n";
             glm::vec4 local_coord = glm::vec4(x, y, z, 1.0f);
             glm::vec4 normal = (local_coord - glm::vec4{0, 0, 0, 1.0f});
 

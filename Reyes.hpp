@@ -1,13 +1,14 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
-#include "Sphere.hpp"
 #include <iostream>
 #include <optional>
 #include <stack>
 #include <functional>
 #include "glm_ostream.hpp"
 #include "shaders.hpp"
+#include "Sphere.hpp"
+#include "Cone.hpp"
 #include "Texture.hpp"
 
 namespace rys
@@ -76,6 +77,7 @@ namespace rys
         reyes(const std::string& n);
 
         void render(const rys::Sphere& sphere); // for debugging purposes, won't be used for release!
+        void render(const rys::Cone& cone); // for debugging purposes, won't be used for release!
         void paint_pixel(int x, int y, const glm::vec3& color);
         rys::sample get_pixel(int x, int y);
         float get_depth(int x, int y);
@@ -178,5 +180,8 @@ namespace rys
 
         glm::vec3 get_ss_coords(const glm::vec4& point);
         void paint_intersecting_samples(const std::pair<glm::vec2i, glm::vec2i>& bb, const rys::polygon& mpoly);
+
+
+        void print_samples(rys::Mesh& mesh);
     };
 }

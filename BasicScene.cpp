@@ -111,8 +111,8 @@ void BasicScene1()
 void Cone()
 {
     RiBegin(RI_NULL);
-    //RiFormat(960, 720, 1.0);
-    RiFormat(400, 300, 1.0);
+    RiFormat(960, 720, 1.0);
+//    RiFormat(400, 300, 1.0);
     RiDisplay("Tunnel.png", "", "");
     RiPixelSamples(2,2);
 
@@ -137,19 +137,20 @@ void Cone()
 //                RiRotate(30, 0, 1, 0);
 //                RiCylinder(1, -1, 1, 360);
 //            RiTransformEnd();
-            RiTransformBegin();
-                color[1] = 0; color[2] = 1;
-                RiColor(color);
-                RiTranslate(0, 1, 9.0);
-                RiRotate(60, 1, 0, 0);
-                RiSphere(1.0, -1.0, 1.0, 360);
-            RiTransformEnd();
+//            RiTransformBegin();
+//                color[1] = 0; color[2] = 1;
+//                RiColor(color);
+//                RiSurface(CHECKERBOARD);
+//                RiTranslate(0, 1, 9.0);
+//                RiRotate(60, 1, 0, 0);
+//                RiSphere(1.0, -1.0, 1.0, 360);
+//            RiTransformEnd();
             RiTransformBegin();
                 color[0] = 1; color[1] = .4; color[2] = .4;
                 RiColor(color);
 //                CHECK_SIZE_X = 40;
 //                CHECK_SIZE_Y = 40;
-//                RiSurface(CHECKERBOARD);
+                RiSurface(CHECKERBOARD);
                 RiTranslate(0, -1, 8.5);
                 RiRotate(-160, 1, 0, 0);
                 RiRotate(30, 0, 1, 0);

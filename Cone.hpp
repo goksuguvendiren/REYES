@@ -22,17 +22,16 @@ namespace rys
         {
             std::vector<std::vector<Grid>> samples;
 
-            float res = 1 / 360.f;
-            for (float u = 0; u <= 1; u += res)
+            float res = 10 / 360.f;
+            for (float v = 0; v <= 1; v += res)
             {
                 std::vector<Grid> line;
-                for (float v = 0; v <= 1; v += res * 2)
+                for (float u = 0; u <= 1; u += res)
                 {
-
                     auto theta = u * tmax;
 
-                    auto x = radius * (1 - v) * std::cos(theta);
-                    auto y = radius * (1 - v) * std::sin(theta);
+                    auto x = radius * (1 - v) * std::cos(glm::radians(theta));
+                    auto y = radius * (1 - v) * std::sin(glm::radians(theta));
                     auto z = v * height;
 
                     glm::vec4 local_coord = glm::vec4(x, y, z, 1.0f);

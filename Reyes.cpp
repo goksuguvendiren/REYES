@@ -17,7 +17,7 @@ rys::reyes::reyes(const std::string& n) : near(0.1f), far(100.f)
 
     proj_matrix = glm::mat4(1.0f);
     current_matrix = glm::mat4(1.0f);
-    view_matrix = glm::lookAt(glm::vec3{0, 0, 0}, glm::vec3{0, 0, 1}, glm::vec3{0, 1, 0});
+    view_matrix = glm::lookAt(glm::vec3{0, 0, -1}, glm::vec3{0, 0, 1}, glm::vec3{0, 1, 0});
 
     current_color = glm::vec3(1.0f);
 
@@ -174,7 +174,8 @@ void rys::reyes::set_depth(int x, int y, float n_depth)
 
 glm::vec3 rys::reyes::get_ss_coords(const glm::vec4& point)
 {
-    auto unit_cube = proj_matrix * view_matrix * point;
+    auto camera = view_matrix * point;
+    auto unit_cube = proj_matrix * camera;
     unit_cube /= unit_cube.w;
 
     unit_cube = viewport_matrix * unit_cube;
@@ -268,6 +269,57 @@ void rys::reyes::render(const rys::Sphere &sphere)
         }
     }
 }
+
+void rys::reyes::print_samples(rys::Mesh& mesh)
+{
+    for (auto& line : mesh.get_grid())
+    {
+        for (auto& g : line)
+        {
+            auto ss = get_ss_coords(g.position);
+
+            bool u_white = (int(g.uv.x * 10) % 2) == 1;
+            bool v_white = (int(g.uv.y * 10) % 2) == 1;
+
+            auto val = u_white ^ v_white;
+            auto color = glm::vec3{val, val, val};
+            paint_pixel(ss.x, ss.y, color);
+        }
+    }
+}
+
+void rys::reyes::render(const rys::Cone &cone)
+{
+    auto mesh = cone.dice();
+//    apply_displacement_shader(mesh);
+
+
+    surface_shader_payload payload{};
+    if (texture) payload.texture = &(*texture);
+    apply_surface_shader(mesh, payload);
+
+//    print_samples(mesh);
+//
+//    return;
+    auto grid = mesh.get_grid();
+
+    for (int i = 0; i < grid.size(); ++i)
+    {
+        for (int j = 0; j < grid[0].size(); ++j)
+        {
+            auto current = grid[i][j];
+            auto right   = grid[i][(j+1) == grid[0].size() ? j : j + 1];
+            auto below   = grid[(i+1) == grid.size() ? i : i + 1][j];
+            auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
+
+            auto mpoly = rys::polygon{current, right, below, cross};
+            auto bounding_box = find_bounding_box(mpoly);
+
+            paint_intersecting_samples(bounding_box, mpoly);
+        }
+    }
+}
+
 
 void rys::reyes::push_current_matrix()
 {

@@ -28,6 +28,7 @@ void NONE(surface_shader_payload& payload);
 
 void CHECKERBOARD(surface_shader_payload& payload);
 
+void UV(surface_shader_payload& payload);
 void NORMAL(surface_shader_payload& payload);
 void PHONG(surface_shader_payload& payload);
 

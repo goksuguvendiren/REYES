@@ -33,28 +33,18 @@ void NONE(surface_shader_payload& payload)
 
 void CHECKERBOARD(surface_shader_payload& payload)
 {
-    bool u_white = (int(payload.uv.x * 20) % 2) == 1;
-    bool v_white = (int(payload.uv.y * 15) % 2) == 1;
+    bool u_white = (int(payload.uv.x * 10) % 2) == 1;
+    bool v_white = (int(payload.uv.y * 10) % 2) == 1;
 
-//    std::cout << payload.uv.x <<'\n';
-
-    if (v_white)
-    {
-        if (u_white)
-        {
-            payload.color = glm::vec4{1, 1, 1, 1.f};
-        }
-        else payload.color = glm::vec4(0, 0, 0, 1.f);
-    }
-    else
-    {
-        if (!u_white)
-        {
-            payload.color = glm::vec4{1, 1, 1, 1.f};
-        }
-        else payload.color = glm::vec4(0, 0, 0, 1.f);
-    }
+    auto val = u_white ^ v_white;
+    payload.color = {val, val, val, 1.0f};
 }
+
+void UV(surface_shader_payload& payload)
+{
+    payload.color = {0, payload.uv.y, 0, 1.0f};
+}
+
 
 static glm::vec4 reflect(const glm::vec3& vec, const glm::vec3& axis)
 {
