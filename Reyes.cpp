@@ -351,6 +351,35 @@ void rys::reyes::render(const rys::Cylinder &cylinder)
     }
 }
 
+void rys::reyes::render(const rys::Torus &torus)
+{
+    auto mesh = torus.dice();
+//    apply_displacement_shader(mesh);
+
+    surface_shader_payload payload{};
+    if (texture) payload.texture = &(*texture);
+    apply_surface_shader(mesh, payload);
+
+    auto grid = mesh.get_grid();
+
+    for (int i = 0; i < grid.size(); ++i)
+    {
+        for (int j = 0; j < grid[0].size(); ++j)
+        {
+            auto current = grid[i][j];
+            auto right   = grid[i][(j+1) == grid[0].size() ? j : j + 1];
+            auto below   = grid[(i+1) == grid.size() ? i : i + 1][j];
+            auto cross   = grid[(i+1) == grid.size() ? i : i + 1][(j+1) == grid[0].size() ? j : j + 1];
+
+            auto mpoly = rys::polygon{current, right, below, cross};
+            auto bounding_box = find_bounding_box(mpoly);
+
+            paint_intersecting_samples(bounding_box, mpoly);
+        }
+    }
+}
+
+
 
 
 void rys::reyes::push_current_matrix()
