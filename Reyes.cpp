@@ -40,7 +40,7 @@ void rys::reyes::world_begin()
 
 void rys::reyes::add_transform(const glm::mat4& transform)
 {
-    current_matrix = transform * current_matrix;
+    current_matrix = current_matrix * transform;
 }
 
 void rys::reyes::set_format(int xres, int yres, float pix_asp_ratio)

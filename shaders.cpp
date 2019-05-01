@@ -67,20 +67,20 @@ void PHONG(surface_shader_payload& payload)
     float kd = 0.6;
     float ks = 0.3;
 
-    glm::vec4 light_position{2, -2, -10, 1.f};
-    glm::vec4 light_intensity{2, 2, 2, 1};
-    glm::vec4 eye_pos{0, 0, 0, 1.0f};
+    glm::vec3 light_position{2, -2, -10};
+    glm::vec3 light_intensity{2, 2, 2};
+    glm::vec3 eye_pos{0, 0, 0};
 
-    glm::vec4 color = payload.color; // TODO : if texture, sample this color from the texture.
-    glm::vec4 point = payload.position;
-    glm::vec4 normal = payload.normal;
+    glm::vec3 color = payload.color; // TODO : if texture, sample this color from the texture.
+    glm::vec3 point = payload.position;
+    glm::vec3 normal = payload.normal;
 
-    glm::vec4 light_dir = glm::normalize(light_position - point);
-    glm::vec4 view_dir  = glm::normalize(eye_pos - point);
+    glm::vec3 light_dir = glm::normalize(light_position - point);
+    glm::vec3 view_dir  = glm::normalize(eye_pos - point);
 
-    glm::vec4 R = reflect(light_dir, normal);
+    glm::vec3 R = reflect(light_dir, normal);
 
-    auto cosalpha = glm::dot(glm::vec3(normal), glm::vec3(light_dir));
+    auto cosalpha = glm::dot(normal, light_dir);
 
     float p = 10;
 
@@ -89,7 +89,12 @@ void PHONG(surface_shader_payload& payload)
     auto specular = ks * light_intensity * std::pow(std::max(0.f, glm::dot(R, view_dir)), p);
 
     // output color:
-    payload.color = ambient + diffuse; //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+    payload.color = glm::vec4(ambient + diffuse + specular, 1.0f); //payload.color / glm::pi<float>() * light_intensity * std::max(0.f, cosalpha);
+}
+
+void NORMAL(surface_shader_payload& payload)
+{
+    payload.color = glm::vec4((payload.normal + glm::vec3{1.f, 1.f, 1.f}) / 2.0f, 1.0f);
 }
 
 void EARTHSHADER(surface_shader_payload& payload)

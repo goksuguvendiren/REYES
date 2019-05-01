@@ -12,9 +12,9 @@
 struct surface_shader_payload
 {
     glm::vec2 uv;
-    glm::vec4 position;
+    glm::vec3 position;
+    glm::vec3 normal;
     glm::vec4 color;
-    glm::vec4 normal;
     Texture* texture;
 };
 
@@ -25,6 +25,7 @@ void NONE(surface_shader_payload& payload);
 
 void CHECKERBOARD(surface_shader_payload& payload);
 
+void NORMAL(surface_shader_payload& payload);
 void PHONG(surface_shader_payload& payload);
 
 void EARTHSHADER(surface_shader_payload& payload);

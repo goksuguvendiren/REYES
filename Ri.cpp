@@ -115,18 +115,18 @@ void RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz)
 
 void RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    glm::mat4 transform = glm::mat4(1.0f);
+//    glm::mat4 transform = glm::mat4(1.0f);
 
 //    assert(dy == 0 && dz == 0);
+//
+//    double cos_th = std::cos(angle);
+//    double sin_th = std::sin(angle);
 
-    double cos_th = std::cos(angle);
-    double sin_th = std::sin(angle);
-
-    glm::mat4 around_x = glm::mat4(1.0f);
-    around_x[1][1] = cos_th;
-    around_x[1][2] = -sin_th;
-    around_x[2][1] = sin_th;
-    around_x[2][2] = cos_th;
+//    glm::mat4 around_x = glm::mat4(1.0f);
+//    around_x[1][1] = cos_th;
+//    around_x[1][2] = -sin_th;
+//    around_x[2][1] = sin_th;
+//    around_x[2][2] = cos_th;
 
 //    glm::mat4 around_y = glm::mat4(1.0f);
 //    around_y[0][0] = cos_th;
@@ -140,7 +140,7 @@ void RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 //    around_z[1][0] = sin_th;
 //    around_z[1][1] = cos_th;
 
-    auto glm_rt = glm::rotate(angle, glm::vec3{dx, dy, dz});
+    auto glm_rt = glm::rotate(glm::radians(angle), glm::vec3{dx, dy, dz});
 //    assert((around_x * around_y * around_z) == glm_rt);
 //    assert(glm::transpose(around_x * around_y * around_z) == glm_rt);
 
@@ -192,10 +192,7 @@ void RiWorldEnd()
 
 void RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax, ...)
 {
-    auto model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0, 0, 5.0));
-    model = glm::rotate(model, -175.0f, glm::vec3(0, 1, 0));
-    model = glm::rotate(model, 110.0f,  glm::vec3(1, 0, 0));
+    auto model = rys::renderer->get_current_matrix();
     rys::Sphere sphere(radius, zmin, zmax, tmax, model);
     rys::renderer->render(sphere);
 }
@@ -229,12 +226,12 @@ void RiShutter(RtFloat min, RtFloat max)
     // If min == max, then no motion blur is done.
 }
 
-void RiTransformBegin(void)
+void RiTransformBegin()
 {
     rys::renderer->push_current_matrix();
 }
 
-void RiTransformEnd(void)
+void RiTransformEnd()
 {
     rys::renderer->pop_current_matrix();
 }

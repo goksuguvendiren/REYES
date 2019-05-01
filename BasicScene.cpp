@@ -44,7 +44,10 @@ void Earth()
     RtColor green={0,1,0};
     RtColor blue={0,0,1};
 
-    RiFrameBegin(0);
+    float var = 0;
+    int key = 0;
+    while (key != 27) {
+        RiFrameBegin(0);
         /* set the perspective transformation */
         float fov = 45.0;
         RiProjection(RI_PERSPECTIVE, "fov", &fov);
@@ -52,14 +55,14 @@ void Earth()
 
         RiWorldBegin();
             RiColor(blue);
-            RiSurface(CHECKERBOARD);
+//            RiSurface(CHECKERBOARD);
 //            RiDisplacement(BUMPY);
             RiTransformBegin();
-                RiMakeTexture("../earth.jpg", 0);
-                RiSurface(EARTHSHADER);
+//                RiMakeTexture("../earth.jpg", 0);
+                RiSurface(PHONG);
                 RiTranslate(0, 0, 5.0);
-                RiRotate(-175, 0, 1, 0);
-                RiRotate(110, 1, 0, 0);
+//                RiRotate(-175, 0, 1, 0);
+//                RiRotate(10, 1, 0, 0);
                 RiSphere(1, -1, 1, 360);
             RiTransformEnd();
 //
@@ -70,10 +73,19 @@ void Earth()
 //                RiRotate(110, 1, 0, 0);
 //                RiSphere(0.5, -1, 1, 360);
 //            RiTransformEnd();
-        RiWorldEnd();
+            RiWorldEnd();
+        RiFrameEnd();
 
-    RiFrameEnd();
-
+        key = cv::waitKey(0);
+        if (key == 'a')
+        {
+            var -= 1;
+        }
+        else if (key == 'd')
+        {
+            var += 1;
+        }
+    }
     RiEnd();
 }
 
